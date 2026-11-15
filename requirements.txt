@@ -1,0 +1,2 @@
+# Dépendances Python : Aucune librairie tierce nécessaire !
+# Le serveur UAG fonctionne à 100% avec la librairie standard Python.

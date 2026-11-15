@@ -1,0 +1,256 @@
+{
+  "match": {
+    "title": "UAG Rugby Féminin - Match de Championnat",
+    "team": "UAG Gaillac",
+    "opponent": "Adversaire",
+    "date": "2026-11-15",
+    "venue": "Stade Bernard Laporte, Gaillac",
+    "currentHalf": "first",
+    "status": "in_progress",
+    "scoreUAG": 5,
+    "scoreOpponent": 0,
+    "timer": {
+      "minutes": 40,
+      "seconds": 0,
+      "isRunning": false
+    }
+  },
+  "players": [
+    {
+      "id": "p1",
+      "name": "Nono",
+      "number": 2,
+      "position": "Talonneuse",
+      "tracker": "Joueuse blessée #1",
+      "active": true,
+      "stats": {
+        "first": {
+          "tackles_made": 8,
+          "tackles_missed": 1,
+          "turnovers_won": 0,
+          "offensive_actions": 5,
+          "turnovers_lost": 0,
+          "rucks_lost": 0,
+          "penalties": 0,
+          "yellow_cards": 0,
+          "red_cards": 0,
+          "white_cards": 0,
+          "minutes_played": 40,
+          "tries": 1,
+          "lineout_throws_made": 5,
+          "lineout_throws_lost": 3
+        },
+        "second": {
+          "tackles_made": 0,
+          "tackles_missed": 0,
+          "turnovers_won": 0,
+          "offensive_actions": 0,
+          "turnovers_lost": 0,
+          "rucks_lost": 0,
+          "penalties": 0,
+          "yellow_cards": 0,
+          "red_cards": 0,
+          "white_cards": 0,
+          "minutes_played": 0,
+          "tries": 0,
+          "lineout_throws_made": 0,
+          "lineout_throws_lost": 0
+        }
+      }
+    },
+    {
+      "id": "p2",
+      "name": "Léa",
+      "number": 1,
+      "position": "Pilier Gauche",
+      "tracker": "Joueuse blessée #2",
+      "active": true,
+      "stats": {
+        "first": {
+          "tackles_made": 6,
+          "tackles_missed": 0,
+          "turnovers_won": 1,
+          "offensive_actions": 3,
+          "turnovers_lost": 1,
+          "rucks_lost": 0,
+          "penalties": 1,
+          "yellow_cards": 0,
+          "red_cards": 0,
+          "white_cards": 0,
+          "minutes_played": 40,
+          "tries": 0,
+          "lineout_throws_made": 0,
+          "lineout_throws_lost": 0
+        },
+        "second": {
+          "tackles_made": 0,
+          "tackles_missed": 0,
+          "turnovers_won": 0,
+          "offensive_actions": 0,
+          "turnovers_lost": 0,
+          "rucks_lost": 0,
+          "penalties": 0,
+          "yellow_cards": 0,
+          "red_cards": 0,
+          "white_cards": 0,
+          "minutes_played": 0,
+          "tries": 0,
+          "lineout_throws_made": 0,
+          "lineout_throws_lost": 0
+        }
+      }
+    },
+    {
+      "id": "p3",
+      "name": "Camille",
+      "number": 8,
+      "position": "Troisième Ligne Centre",
+      "tracker": "Joueuse blessée #3",
+      "active": true,
+      "stats": {
+        "first": {
+          "tackles_made": 11,
+          "tackles_missed": 2,
+          "turnovers_won": 2,
+          "offensive_actions": 7,
+          "turnovers_lost": 0,
+          "rucks_lost": 1,
+          "penalties": 0,
+          "yellow_cards": 0,
+          "red_cards": 0,
+          "white_cards": 0,
+          "minutes_played": 40,
+          "tries": 0,
+          "lineout_throws_made": 0,
+          "lineout_throws_lost": 0
+        },
+        "second": {
+          "tackles_made": 0,
+          "tackles_missed": 0,
+          "turnovers_won": 0,
+          "offensive_actions": 0,
+          "turnovers_lost": 0,
+          "rucks_lost": 0,
+          "penalties": 0,
+          "yellow_cards": 0,
+          "red_cards": 0,
+          "white_cards": 0,
+          "minutes_played": 0,
+          "tries": 0,
+          "lineout_throws_made": 0,
+          "lineout_throws_lost": 0
+        }
+      }
+    },
+    {
+      "id": "p4",
+      "name": "Sarah",
+      "number": 10,
+      "position": "Demi d'Ouverture",
+      "tracker": "",
+      "active": true,
+      "stats": {
+        "first": {
+          "tackles_made": 4,
+          "tackles_missed": 1,
+          "turnovers_won": 0,
+          "offensive_actions": 6,
+          "turnovers_lost": 1,
+          "rucks_lost": 0,
+          "penalties": 0,
+          "yellow_cards": 0,
+          "red_cards": 0,
+          "white_cards": 0,
+          "minutes_played": 40,
+          "tries": 0,
+          "lineout_throws_made": 0,
+          "lineout_throws_lost": 0
+        },
+        "second": {
+          "tackles_made": 0,
+          "tackles_missed": 0,
+          "turnovers_won": 0,
+          "offensive_actions": 0,
+          "turnovers_lost": 0,
+          "rucks_lost": 0,
+          "penalties": 0,
+          "yellow_cards": 0,
+          "red_cards": 0,
+          "white_cards": 0,
+          "minutes_played": 0,
+          "tries": 0,
+          "lineout_throws_made": 0,
+          "lineout_throws_lost": 0
+        }
+      }
+    },
+    {
+      "id": "p5",
+      "name": "Chloé",
+      "number": 14,
+      "position": "Ailière",
+      "tracker": "",
+      "active": true,
+      "stats": {
+        "first": {
+          "tackles_made": 3,
+          "tackles_missed": 0,
+          "turnovers_won": 0,
+          "offensive_actions": 4,
+          "turnovers_lost": 0,
+          "rucks_lost": 0,
+          "penalties": 0,
+          "yellow_cards": 0,
+          "red_cards": 0,
+          "white_cards": 0,
+          "minutes_played": 40,
+          "tries": 0,
+          "lineout_throws_made": 0,
+          "lineout_throws_lost": 0
+        },
+        "second": {
+          "tackles_made": 0,
+          "tackles_missed": 0,
+          "turnovers_won": 0,
+          "offensive_actions": 0,
+          "turnovers_lost": 0,
+          "rucks_lost": 0,
+          "penalties": 0,
+          "yellow_cards": 0,
+          "red_cards": 0,
+          "white_cards": 0,
+          "minutes_played": 0,
+          "tries": 0,
+          "lineout_throws_made": 0,
+          "lineout_throws_lost": 0
+        }
+      }
+    }
+  ],
+  "history": [
+    {
+      "id": "act-1",
+      "time": "18:48",
+      "minute": 38,
+      "half": "first",
+      "playerId": "p1",
+      "playerName": "Nono",
+      "category": "tries",
+      "label": "Essai",
+      "delta": 1,
+      "user": "Blessée N°1"
+    },
+    {
+      "id": "act-2",
+      "time": "18:50",
+      "minute": 40,
+      "half": "first",
+      "playerId": "p1",
+      "playerName": "Nono",
+      "category": "tackles_made",
+      "label": "Plaquage réussi",
+      "delta": 1,
+      "user": "Blessée N°1"
+    }
+  ]
+}

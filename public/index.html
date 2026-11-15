@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>UAG Rugby Gaillac - Statistiques</title>
+  <meta name="theme-color" content="#0F1015">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/png" href="/images/uag_logo.png">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- ====================================================================
+       HEADER MINIMALISTE & ÉPURÉ (1 SEULE BARRE FLUIDE)
+       ==================================================================== -->
+  <header class="app-header">
+    <div class="header-left" onclick="switchTab('tracker')">
+      <img src="/images/uag_logo.png" alt="UAG" class="header-logo">
+      <div class="header-title-group">
+        <span class="header-title">UAG <strong class="red-text">RUGBY</strong></span>
+        <span class="live-status-dot" id="live-indicator" title="Synchronisé en direct">
+          <span class="pulse-dot"></span> <span id="live-text">Direct</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- SCORE & CHRONO COMPACT DANS LE HEADER -->
+    <div class="header-center" id="scoreboard-trigger" title="Cliquer pour ajuster le score">
+      <div class="score-pill">
+        <span class="score-team">UAG</span>
+        <span class="score-val" id="score-uag">0</span>
+        <span class="score-sep">-</span>
+        <span class="score-val" id="score-opponent">0</span>
+        <span class="score-team" id="label-opponent">ADV</span>
+      </div>
+      <div class="timer-pill" id="timer-box">
+        <span id="match-timer-display">40:00</span>
+        <button id="btn-timer-toggle" class="btn-timer-icon" title="Démarrer / Pause">▶</button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="btn-icon-ghost" id="btn-open-share" title="Partager le QR Code">
+        📲
+      </button>
+    </div>
+  </header>
+
+  <!-- ====================================================================
+       CONTENU PRINCIPAL
+       ==================================================================== -->
+  <main class="app-main">
+
+    <!-- ==================================================================
+         ONGLET 1 : SAISIE (EXPÉRIENCE SOBRE, RAPIDE ET FOCALISÉE)
+         ================================================================== -->
+    <div class="tab-pane active" id="tab-tracker">
+      
+      <!-- SÉLECTEUR DE MI-TEMPS MINIMALISTE -->
+      <div class="period-selector-row">
+        <div class="segmented-control">
+          <button class="segment-btn active" data-half="first" id="btn-half-first">1ère Mi-temps</button>
+          <button class="segment-btn" data-half="second" id="btn-half-second">2ème Mi-temps</button>
+          <button class="segment-btn" data-half="total" id="btn-half-total">Total</button>
+        </div>
+      </div>
+
+      <!-- BANDEAU CARROUSEL DE JOUEUSES (1 SEUL CHOIX, SIMPLE & ÉLÉGANT) -->
+      <div class="players-scroll-bar" id="player-carousel-track">
+        <!-- Rempli dynamiquement : [#2 Nono] [#1 Léa] [#8 Camille]... -->
+      </div>
+
+      <!-- SYNTHÈSE ÉPURÉE DE LA JOUEUSE ACTIVE -->
+      <div class="player-summary-strip">
+        <div class="player-name-badge">
+          <span class="player-badge-num" id="current-player-avatar">2</span>
+          <span class="player-badge-name" id="current-player-name">Nono</span>
+          <span class="player-badge-pos" id="tracker-position-badge">Talonneuse</span>
+        </div>
+        <div class="player-inline-stats" id="player-inline-kpis">
+          <span id="kpi-tackles-rate">Plaquages: 0%</span>
+          <span class="stat-dot">•</span>
+          <span id="kpi-throws-rate">Touches: -</span>
+          <span class="stat-dot">•</span>
+          <span id="kpi-attack-ratio">Bilan: 0</span>
+        </div>
+      </div>
+
+      <!-- FILTRE PAR PHASE RAPIDE (DISCRET & FACULTATIF) -->
+      <div class="quick-phase-tabs">
+        <button class="phase-pill active" data-phase="all">Tout</button>
+        <button class="phase-pill" data-phase="defense">Défense</button>
+        <button class="phase-pill" data-phase="attaque">Attaque</button>
+        <button class="phase-pill" data-phase="conquete">Touches</button>
+        <button class="phase-pill" data-phase="discipline">Fautes</button>
+      </div>
+
+      <!-- GRILLE DES ACTIONS PRINCIPALES (SOBRE & HAUTE LISIBILITÉ) -->
+      <div class="actions-grid" id="stats-buttons-grid">
+        <!-- Rempli dynamiquement avec cartes sobres et efficaces -->
+      </div>
+
+      <!-- BOUTON D'ANNULATION DISCRET FLOTTANT -->
+      <div class="floating-undo-wrapper" id="floating-actions-bar">
+        <button class="btn-undo-sleek" id="btn-undo-action">
+          <span>↩</span> Annuler dernière action (<span id="undo-label-preview">aucun</span>)
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ==================================================================
+         ONGLET 2 : ÉQUIPE (VUE STAFF COMPLÈTE & ÉPURÉE)
+         ================================================================== -->
+    <div class="tab-pane" id="tab-team">
+      
+      <!-- SYNTHÈSE D'ÉQUIPE MINIMALISTE -->
+      <div class="team-quick-stats">
+        <div class="stat-card-compact">
+          <span class="compact-label">Top Plaqueuse</span>
+          <strong class="compact-val" id="summary-top-tackler">-</strong>
+        </div>
+        <div class="stat-card-compact">
+          <span class="compact-label">Top Marqueuse</span>
+          <strong class="compact-val" id="summary-top-scorer">-</strong>
+        </div>
+        <div class="stat-card-compact">
+          <span class="compact-label">% Plaquages Équipe</span>
+          <strong class="compact-val" id="summary-team-tackles-rate">0%</strong>
+        </div>
+        <div class="stat-card-compact">
+          <span class="compact-label">% Touches Conservées</span>
+          <strong class="compact-val" id="summary-team-lineout-rate">0%</strong>
+        </div>
+      </div>
+
+      <!-- FILTRE ET OUTILS DU TABLEAU -->
+      <div class="team-tools-bar">
+        <div class="segmented-control-mini">
+          <button class="segment-mini-btn active" data-pos="all">Toutes</button>
+          <button class="segment-mini-btn" data-pos="forwards">Avants</button>
+          <button class="segment-mini-btn" data-pos="backs">3/4</button>
+        </div>
+        <div class="team-tools-right">
+          <input type="text" id="input-search-player" placeholder="Rechercher..." class="input-search-minimal">
+          <button class="btn-secondary-mini" id="btn-export-csv" title="Exporter au format Excel / CSV">
+            📥 CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- TABLEAU DES STATISTIQUES COLLECTIVES -->
+      <div class="table-container-sleek">
+        <table class="sleek-table" id="team-overview-table">
+          <thead>
+            <tr>
+              <th class="sticky-player-col" data-sort="name">Joueuse</th>
+              <th data-sort="position">Poste</th>
+              <th data-sort="tMade" class="col-green">Plaq +</th>
+              <th data-sort="tMiss" class="col-red">Plaq -</th>
+              <th data-sort="tRate">% Plaq</th>
+              <th data-sort="grattage">Grattage</th>
+              <th data-sort="off" class="col-gold">Offensif</th>
+              <th data-sort="lost" class="col-red">Perte</th>
+              <th data-sort="pen" class="col-red">Pénalité</th>
+              <th data-sort="cards">Carton</th>
+              <th data-sort="tries" class="col-gold">Essai</th>
+              <th data-sort="lMade">Lancer +</th>
+              <th data-sort="lMiss">Lancer -</th>
+              <th data-sort="lRate">% Lancer</th>
+              <th data-sort="min">Tps</th>
+            </tr>
+          </thead>
+          <tbody id="team-table-body">
+            <!-- Rempli dynamiquement -->
+          </tbody>
+          <tfoot id="team-table-foot">
+            <!-- Totaux collectifs -->
+          </tfoot>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ==================================================================
+         ONGLET 3 : DIRECT (JOURNAL CHRONOLOGIQUE PROPRE)
+         ================================================================== -->
+    <div class="tab-pane" id="tab-feed">
+      <div class="feed-header-minimal">
+        <h3>Fil du Match en Direct</h3>
+        <button class="btn-text-ghost" id="btn-clear-feed">Effacer</button>
+      </div>
+      <ul class="clean-feed-list" id="match-live-feed">
+        <!-- Rempli dynamiquement -->
+      </ul>
+    </div>
+
+    <!-- ==================================================================
+         ONGLET 4 : MATCH & PARAMÈTRES
+         ================================================================== -->
+    <div class="tab-pane" id="tab-settings">
+      <div class="settings-container">
+        
+        <!-- SCORE & ADVERSAIRE -->
+        <div class="settings-card">
+          <h4>Match & Scores</h4>
+          <div class="form-row-2">
+            <div class="form-field">
+              <label>Adversaire</label>
+              <input type="text" id="input-match-opponent" placeholder="Nom de l'équipe adverse" class="clean-input">
+            </div>
+            <div class="form-field">
+              <label>Score UAG</label>
+              <input type="number" id="input-score-uag" value="0" min="0" class="clean-input">
+            </div>
+            <div class="form-field">
+              <label>Score Adversaire</label>
+              <input type="number" id="input-score-opponent" value="0" min="0" class="clean-input">
+            </div>
+          </div>
+          <button class="btn-primary-sleek" id="btn-save-match-info" style="margin-top:12px;">
+            Enregistrer le Match
+          </button>
+        </div>
+
+        <!-- AJOUTER JOUEUSE -->
+        <div class="settings-card">
+          <h4>Ajouter une Joueuse</h4>
+          <form id="form-add-player">
+            <div class="form-row-2">
+              <div class="form-field" style="flex:2;">
+                <label>Nom ou Surnom</label>
+                <input type="text" id="input-new-name" placeholder="Ex: Nono, Sarah..." required class="clean-input">
+              </div>
+              <div class="form-field" style="flex:1;">
+                <label>N°</label>
+                <input type="number" id="input-new-number" placeholder="2" min="1" max="99" class="clean-input">
+              </div>
+              <div class="form-field" style="flex:2;">
+                <label>Poste</label>
+                <select id="input-new-position" class="clean-input">
+                  <option value="Talonneuse">Talonneuse (2)</option>
+                  <option value="Pilier Gauche">Pilier Gauche (1)</option>
+                  <option value="Pilier Droit">Pilier Droit (3)</option>
+                  <option value="Deuxième Ligne">Deuxième Ligne (4-5)</option>
+                  <option value="Troisième Ligne Aile">Troisième Ligne Aile (6-7)</option>
+                  <option value="Troisième Ligne Centre">Troisième Ligne Centre (8)</option>
+                  <option value="Demi de Mêlée">Demi de Mêlée (9)</option>
+                  <option value="Demi d'Ouverture">Demi d'Ouverture (10)</option>
+                  <option value="Centre">Centre (12-13)</option>
+                  <option value="Ailière">Ailière (11-14)</option>
+                  <option value="Arrière">Arrière (15)</option>
+                  <option value="Remplaçante">Remplaçante</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary-sleek" style="margin-top:12px;">
+              + Ajouter la Joueuse
+            </button>
+          </form>
+        </div>
+
+        <!-- OPTIONS D'ÉQUIPE ET RÉINITIALISATION -->
+        <div class="settings-card">
+          <h4>Actions Rapides</h4>
+          <div class="quick-actions-grid">
+            <button class="btn-secondary-sleek" id="btn-load-standard-team">
+              🏉 Charger les 15 Titulaires UAG
+            </button>
+            <button class="btn-secondary-sleek btn-danger-soft" id="btn-reset-half">
+              🔄 Réinitialiser la Mi-temps
+            </button>
+            <button class="btn-secondary-sleek btn-danger-soft" id="btn-reset-match">
+              ⚠️ Nouveau Match (Zéro)
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ====================================================================
+       BARRE DE NAVIGATION DU BAS (4 ONGLETS ÉPURÉS)
+       ==================================================================== -->
+  <nav class="app-bottom-nav">
+    <button class="nav-tab-item active" data-tab="tracker">
+      <span class="nav-icon">🏉</span>
+      <span class="nav-text">Saisie</span>
+    </button>
+    <button class="nav-tab-item" data-tab="team">
+      <span class="nav-icon">📊</span>
+      <span class="nav-text">Équipe</span>
+    </button>
+    <button class="nav-tab-item" data-tab="feed">
+      <span class="nav-icon">⚡</span>
+      <span class="nav-text">Direct</span>
+      <span id="feed-count-badge" class="mini-counter">0</span>
+    </button>
+    <button class="nav-tab-item" data-tab="settings">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-text">Match</span>
+    </button>
+  </nav>
+
+  <!-- ====================================================================
+       NOTIFICATION TOAST SOBRE (DISCRÈTE EN BAS)
+       ==================================================================== -->
+  <div id="toast-action-container" class="toast-minimal" style="display:none;">
+    <span class="toast-dot"></span>
+    <span id="toast-action-text">Action enregistrée</span>
+    <button id="btn-toast-undo" class="toast-undo-link">Annuler</button>
+  </div>
+
+  <!-- MODAL SCORE RAPIDE (RUGBY) -->
+  <div class="modal-overlay" id="modal-score">
+    <div class="modal-card-sleek">
+      <div class="modal-header-simple">
+        <h3>Ajuster le Score</h3>
+        <button class="btn-close-simple" id="btn-close-score">✕</button>
+      </div>
+
+      <div class="score-adjust-flex">
+        <div class="score-adjust-team">
+          <div class="score-team-lbl red-text">UAG GAILLAC</div>
+          <div class="score-team-num" id="score-modal-uag-val">0</div>
+          <div class="score-btns-column">
+            <button class="btn-point-btn btn-essai" onclick="addPointsToTeam('uag', 5)">+5 Essai</button>
+            <button class="btn-point-btn btn-transfo" onclick="addPointsToTeam('uag', 2)">+2 Transfo</button>
+            <button class="btn-point-btn btn-penalite" onclick="addPointsToTeam('uag', 3)">+3 Pénalité</button>
+            <button class="btn-point-btn btn-minus" onclick="addPointsToTeam('uag', -1)">−1</button>
+          </div>
+        </div>
+
+        <div class="score-adjust-team">
+          <div class="score-team-lbl" id="score-modal-opp-label">ADVERSAIRE</div>
+          <div class="score-team-num" id="score-modal-opp-val">0</div>
+          <div class="score-btns-column">
+            <button class="btn-point-btn btn-essai" onclick="addPointsToTeam('opp', 5)">+5 Essai</button>
+            <button class="btn-point-btn btn-transfo" onclick="addPointsToTeam('opp', 2)">+2 Transfo</button>
+            <button class="btn-point-btn btn-penalite" onclick="addPointsToTeam('opp', 3)">+3 Pénalité</button>
+            <button class="btn-point-btn btn-minus" onclick="addPointsToTeam('opp', -1)">−1</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CARTONS (BLANC / JAUNE / ROUGE) -->
+  <div class="modal-overlay" id="modal-card-picker">
+    <div class="modal-card-sleek">
+      <div class="modal-header-simple">
+        <h3>Sanction Disciplinaire</h3>
+        <button class="btn-close-simple" id="btn-close-card-picker">✕</button>
+      </div>
+      <p class="modal-subtext" id="card-picker-player-name">Sélectionner un carton</p>
+
+      <div class="cards-list-clean">
+        <button class="card-item-clean" onclick="submitCardAction('white_cards', 1)">
+          <span class="card-tag card-tag-white">Blanc</span>
+          <span>Carton Blanc (10 mn faute répétée)</span>
+        </button>
+        <button class="card-item-clean" onclick="submitCardAction('yellow_cards', 1)">
+          <span class="card-tag card-tag-yellow">Jaune</span>
+          <span>Carton Jaune (10 mn antijeu / faute grave)</span>
+        </button>
+        <button class="card-item-clean" onclick="submitCardAction('red_cards', 1)">
+          <span class="card-tag card-tag-red">Rouge</span>
+          <span>Carton Rouge (Expulsion définitive)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PARTAGE QR CODE -->
+  <div class="modal-overlay" id="modal-share">
+    <div class="modal-card-sleek" style="text-align:center;">
+      <div class="modal-header-simple">
+        <h3>Connecter les Joueuses</h3>
+        <button class="btn-close-simple" id="btn-close-share">✕</button>
+      </div>
+      <p class="modal-subtext">Flasher avec l'appareil photo du smartphone :</p>
+
+      <div class="qr-box-minimal" id="qr-target"></div>
+      <div class="qr-link-display" id="share-url-text">http://localhost:8080</div>
+
+      <button class="btn-primary-sleek" id="btn-copy-url" style="width:100%; margin-top:12px;">
+        Copier le lien
+      </button>
+    </div>
+  </div>
+
+  <script src="/js/qrcode.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

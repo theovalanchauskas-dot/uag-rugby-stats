@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 560" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E61E2B"/>
+      <stop offset="60%" stop-color="#C1121F"/>
+      <stop offset="100%" stop-color="#780000"/>
+    </linearGradient>
+    <linearGradient id="blackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2B2D42"/>
+      <stop offset="50%" stop-color="#111116"/>
+      <stop offset="100%" stop-color="#050507"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE49E"/>
+      <stop offset="35%" stop-color="#F4A261"/>
+      <stop offset="70%" stop-color="#E76F51"/>
+      <stop offset="100%" stop-color="#D4AF37"/>
+    </linearGradient>
+    <linearGradient id="shieldBorder" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFD166"/>
+      <stop offset="50%" stop-color="#E09F3E"/>
+      <stop offset="100%" stop-color="#9E2A2B"/>
+    </linearGradient>
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Shadow Outer Shield -->
+  <path d="M 250 20 L 440 80 C 440 280 390 440 250 530 C 110 440 60 280 60 80 Z" 
+        fill="#000000" opacity="0.4" filter="url(#dropShadow)"/>
+
+  <!-- Golden Border Outer -->
+  <path d="M 250 20 L 440 80 C 440 280 390 440 250 530 C 110 440 60 280 60 80 Z" 
+        fill="url(#goldGrad)" stroke="#660708" stroke-width="4"/>
+
+  <!-- Black Inner Border -->
+  <path d="M 250 34 L 426 88 C 426 272 378 424 250 510 C 122 424 74 272 74 88 Z" 
+        fill="#0B090A"/>
+
+  <!-- Shield Body Split: Left Red, Right Black -->
+  <g id="shield-body">
+    <!-- Left Half (Rouge Gaillac) -->
+    <path d="M 250 44 L 86 94 C 86 265 130 408 250 494 Z" 
+          fill="url(#redGrad)"/>
+    <!-- Right Half (Noir Gaillac) -->
+    <path d="M 250 44 L 414 94 C 414 265 370 408 250 494 Z" 
+          fill="url(#blackGrad)"/>
+    <!-- Center Dividing Line -->
+    <line x1="250" y1="44" x2="250" y2="494" stroke="#FFD166" stroke-width="2.5" opacity="0.7"/>
+  </g>
+
+  <!-- Upper Banner with Club Initials U.A.G. -->
+  <path d="M 120 70 L 380 70 L 360 145 L 140 145 Z" fill="#111116" stroke="url(#goldGrad)" stroke-width="3" rx="4"/>
+  <text x="250" y="125" font-family="'Impact', 'Arial Black', sans-serif" font-size="52" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">
+    U<tspan fill="#E61E2B">.</tspan>A<tspan fill="#FFD166">.</tspan>G
+  </text>
+
+  <!-- Rugby Ball in Center -->
+  <g transform="translate(250, 240) rotate(-22)">
+    <!-- Ball body -->
+    <ellipse cx="0" cy="0" rx="85" ry="52" fill="#800F2F" stroke="url(#goldGrad)" stroke-width="4"/>
+    <!-- Seams / Stripes -->
+    <path d="M -70 -20 Q 0 -5 70 -20" stroke="#FFFFFF" stroke-width="5" fill="none"/>
+    <path d="M -70 20 Q 0 5 70 20" stroke="#FFFFFF" stroke-width="5" fill="none"/>
+    <!-- Ball Laces -->
+    <line x1="-35" y1="0" x2="35" y2="0" stroke="#FFFFFF" stroke-width="4"/>
+    <line x1="-25" y1="-10" x2="-25" y2="10" stroke="#FFFFFF" stroke-width="3.5"/>
+    <line x1="-12" y1="-11" x2="-12" y2="11" stroke="#FFFFFF" stroke-width="3.5"/>
+    <line x1="0" y1="-12" x2="0" y2="12" stroke="#FFFFFF" stroke-width="3.5"/>
+    <line x1="12" y1="-11" x2="12" y2="11" stroke="#FFFFFF" stroke-width="3.5"/>
+    <line x1="25" y1="-10" x2="25" y2="10" stroke="#FFFFFF" stroke-width="3.5"/>
+  </g>
+
+  <!-- Le Coq Gaillacois (Gallic Rooster Crest Symbol of Gaillac) -->
+  <g transform="translate(250, 220) scale(0.75)" filter="url(#glow)">
+    <!-- Stylized Rooster Head & Comb -->
+    <path d="M -20 -70 C -35 -95 10 -95 0 -70 C 15 -90 40 -70 20 -50 C 45 -45 40 -20 15 -20 L 25 -5 C 10 5 -5 -10 -15 -25 C -35 -20 -40 -45 -20 -70 Z" 
+          fill="#FFD166" stroke="#9E2A2B" stroke-width="2"/>
+    <!-- Eye -->
+    <circle cx="-5" cy="-45" r="4" fill="#111116"/>
+    <circle cx="-6" cy="-46" r="1.5" fill="#FFFFFF"/>
+    <!-- Beak -->
+    <polygon points="-25,-40 -50,-33 -25,-25" fill="#F4A261" stroke="#BA181B" stroke-width="2"/>
+    <!-- Wattle -->
+    <path d="M -25 -22 C -35 0 -15 15 -10 -5 Z" fill="#E61E2B" stroke="#780000" stroke-width="2"/>
+  </g>
+
+  <!-- Banner "GAILLAC" -->
+  <g transform="translate(250, 360)">
+    <!-- Banner Shadow & Ribbon -->
+    <path d="M -180 0 L 180 0 L 160 55 L -160 55 Z" fill="#E61E2B" stroke="#FFD166" stroke-width="3"/>
+    <path d="M -180 0 L -160 55 L -200 45 Z" fill="#780000"/>
+    <path d="M 180 0 L 160 55 L 200 45 Z" fill="#780000"/>
+    <!-- Text GAILLAC -->
+    <text x="0" y="42" font-family="'Impact', 'Arial Black', sans-serif" font-size="38" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="6">
+      GAILLAC
+    </text>
+  </g>
+
+  <!-- "RUGBY" & "1901" Section -->
+  <g transform="translate(250, 440)">
+    <!-- Golden Star or Grape cluster decoration -->
+    <text x="0" y="0" font-family="'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="800" fill="#FFD166" text-anchor="middle" letter-spacing="8">
+      RUGBY
+    </text>
+    <text x="0" y="28" font-family="'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="700" fill="#E0E1DD" text-anchor="middle" letter-spacing="4">
+      DEPUIS 1901
+    </text>
+    <!-- Little grape bunch icon -->
+    <g transform="translate(-18, 38) scale(0.65)" fill="#FFD166">
+      <circle cx="15" cy="5" r="4.5"/>
+      <circle cx="26" cy="5" r="4.5"/>
+      <circle cx="37" cy="5" r="4.5"/>
+      <circle cx="20" cy="14" r="4.5"/>
+      <circle cx="31" cy="14" r="4.5"/>
+      <circle cx="26" cy="23" r="4.5"/>
+    </g>
+  </g>
+</svg>
