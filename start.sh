@@ -28,7 +28,7 @@ except:
 # Détection d'un port disponible
 PORT=$(/usr/bin/python3 -c "
 import socket
-for p in [8000, 8080, 8888, 5050]:
+for p in [8888, 5050, 8080, 8000]:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -40,7 +40,7 @@ for p in [8000, 8080, 8888, 5050]:
 ")
 
 if [ -z "$PORT" ]; then
-    PORT=8080
+    PORT=8888
 fi
 
 echo "✅ Serveur prêt !"
