@@ -25,7 +25,7 @@
       "active": true,
       "stats": {
         "first": {
-          "tackles_made": 2,
+          "tackles_made": 3,
           "tackles_missed": 1,
           "turnovers_won": 0,
           "offensive_actions": 0,
@@ -648,6 +648,19 @@
     }
   ],
   "history": [
+    {
+      "id": "act-1795528089622",
+      "time": "14:48:09",
+      "minute": 40,
+      "half": "first",
+      "playerId": "p1",
+      "playerName": "Léa",
+      "category": "tackles_made",
+      "label": "Plaquage réussi",
+      "delta": 1,
+      "newValue": 3,
+      "user": "Staff UAG"
+    },
     {
       "id": "act-1795527190335",
       "time": "14:33:10",
