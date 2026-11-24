@@ -8,12 +8,33 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="icon" type="image/png" href="/images/uag_logo.png">
+  
+  <!-- Polices Sportives & Athlétiques Officielles UAG -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800&family=Oswald:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 
+  <!-- BANDEAU DE CÉLÉBRATION ESSAI DYNAMIQUE -->
+  <div id="essai-celebration" class="essai-celebration-banner" style="display:none;">
+    <div class="celebration-content">
+      <span class="celebration-ball">🏉</span>
+      <div class="celebration-text">
+        <div class="celebration-title">ESSAI UAG GAILLAC !</div>
+        <div class="celebration-sub">+5 POINTS AU SCORE DU MATCH</div>
+      </div>
+      <span class="celebration-sparkles">✨</span>
+    </div>
+  </div>
+
+  <!-- LISERÉ ROUGE & NOIR OFFICIEL UAG -->
+  <div class="uag-top-ribbon"></div>
+
   <!-- ====================================================================
-       HEADER MINIMALISTE & ÉPURÉ (1 SEULE BARRE FLUIDE)
+       HEADER SCOREBUG TV & MINIMALISTE (1 SEULE BARRE FLUIDE)
        ==================================================================== -->
   <header class="app-header">
     <div class="header-left" onclick="switchTab('tracker')">
@@ -26,10 +47,10 @@
       </div>
     </div>
 
-    <!-- SCORE & CHRONO COMPACT DANS LE HEADER -->
+    <!-- SCORE & CHRONO COMPACT STYLE HABILLAGE TV DANS LE HEADER -->
     <div class="header-center" id="scoreboard-trigger" title="Cliquer pour ajuster le score">
       <div class="score-pill">
-        <span class="score-team">UAG</span>
+        <span class="score-team score-team-uag">UAG</span>
         <span class="score-val" id="score-uag">0</span>
         <span class="score-sep">-</span>
         <span class="score-val" id="score-opponent">0</span>
@@ -42,6 +63,9 @@
     </div>
 
     <div class="header-right">
+      <button class="btn-icon-ghost" id="btn-sunlight-toggle" title="Mode Plein Soleil (Contraste Stade) / Nuit">
+        <span id="sunlight-icon">☀️</span>
+      </button>
       <button class="btn-icon-ghost" id="btn-open-share" title="Partager le QR Code">
         📲
       </button>
@@ -58,13 +82,21 @@
          ================================================================== -->
     <div class="tab-pane active" id="tab-tracker">
       
-      <!-- SÉLECTEUR DE MI-TEMPS MINIMALISTE -->
+      <!-- SÉLECTEUR DE MI-TEMPS ET BASCULE MODE TOUCHE -->
       <div class="period-selector-row">
         <div class="segmented-control">
           <button class="segment-btn active" data-half="first" id="btn-half-first">1ère Mi-temps</button>
           <button class="segment-btn" data-half="second" id="btn-half-second">2ème Mi-temps</button>
           <button class="segment-btn" data-half="total" id="btn-half-total">Total</button>
         </div>
+        <button class="btn-mode-touche active" id="btn-toggle-touche-mode" title="Basculer entre Mode Touche (gros boutons) et Mode Complet">
+          <span class="touche-icon">⚡</span> <span id="label-touche-mode">Mode Touche</span>
+        </button>
+      </div>
+
+      <!-- PAVÉ DE SÉLECTION RAPIDE DE JOUEUSE PAR NUMÉRO -->
+      <div class="quick-number-pad" id="quick-number-pad">
+        <!-- Rempli dynamiquement avec les numéros : #1 Léa, #2 Nono... -->
       </div>
 
       <!-- BANDEAU CARROUSEL DE JOUEUSES (1 SEUL CHOIX, SIMPLE & ÉLÉGANT) -->
@@ -116,23 +148,65 @@
          ================================================================== -->
     <div class="tab-pane" id="tab-team">
       
-      <!-- SYNTHÈSE D'ÉQUIPE MINIMALISTE -->
-      <div class="team-quick-stats">
-        <div class="stat-card-compact">
-          <span class="compact-label">Top Plaqueuse</span>
-          <strong class="compact-val" id="summary-top-tackler">-</strong>
+      <!-- LES 3 CHIFFRES CLÉS DU COACH (BRIEFING MI-TEMPS & VESTIAIRE) -->
+      <div class="coach-dashboard-cards">
+        <!-- CARTE 1 : EFFICACITÉ AU PLAQUAGE -->
+        <div class="coach-kpi-card coach-kpi-defense">
+          <div class="coach-kpi-header">
+            <span class="coach-kpi-title">🛡️ Efficacité Plaquages</span>
+            <span class="coach-kpi-badge" id="coach-badge-defense">Solide</span>
+          </div>
+          <div class="coach-kpi-body">
+            <div class="coach-kpi-main">
+              <span class="coach-kpi-big" id="coach-tackles-rate">0%</span>
+              <span class="coach-kpi-sub" id="coach-tackles-sub">0 réussis / 0 manqués</span>
+            </div>
+            <div class="coach-progress-bar">
+              <div class="coach-progress-fill" id="coach-tackles-bar" style="width: 0%;"></div>
+            </div>
+          </div>
         </div>
-        <div class="stat-card-compact">
-          <span class="compact-label">Top Marqueuse</span>
-          <strong class="compact-val" id="summary-top-scorer">-</strong>
+
+        <!-- CARTE 2 : DISCIPLINE & FAUTES -->
+        <div class="coach-kpi-card coach-kpi-discipline">
+          <div class="coach-kpi-header">
+            <span class="coach-kpi-title">🚩 Discipline du Match</span>
+            <span class="coach-kpi-badge" id="coach-badge-discipline">Impeccable</span>
+          </div>
+          <div class="coach-kpi-body">
+            <div class="coach-kpi-main">
+              <span class="coach-kpi-big" id="coach-penalties-count">0</span>
+              <span class="coach-kpi-sub" id="coach-penalties-sub">pénalité concédée</span>
+            </div>
+            <div class="coach-cards-summary" id="coach-cards-icons">
+              <span class="badge-no-card">Aucun carton</span>
+            </div>
+          </div>
         </div>
-        <div class="stat-card-compact">
-          <span class="compact-label">% Plaquages Équipe</span>
-          <strong class="compact-val" id="summary-team-tackles-rate">0%</strong>
+
+        <!-- CARTE 3 : COMBAT & BALLONS (GRATTAGES VS PERTES) -->
+        <div class="coach-kpi-card coach-kpi-turnovers">
+          <div class="coach-kpi-header">
+            <span class="coach-kpi-title">🧲 Combat & Ballons</span>
+            <span class="coach-kpi-badge" id="coach-badge-turnovers">Équilibré</span>
+          </div>
+          <div class="coach-kpi-body">
+            <div class="coach-kpi-main">
+              <span class="coach-kpi-big" id="coach-turnover-balance">0</span>
+              <span class="coach-kpi-sub" id="coach-turnover-sub">0 grattages / 0 pertes</span>
+            </div>
+            <div class="coach-lineout-rate">
+              Touches : <b id="coach-lineout-pct">-</b>
+            </div>
+          </div>
         </div>
-        <div class="stat-card-compact">
-          <span class="compact-label">% Touches Conservées</span>
-          <strong class="compact-val" id="summary-team-lineout-rate">0%</strong>
+      </div>
+
+      <!-- PODIUM TOP 3 PLAQUEUSES DU MATCH -->
+      <div class="coach-podium-card">
+        <div class="podium-title">🏉 Top Guerrières au Plaquage (Discours Vestiaire)</div>
+        <div class="podium-row" id="coach-podium-list">
+          <span style="color:var(--text-muted); font-size:0.75rem;">En attente des premiers plaquages...</span>
         </div>
       </div>
 

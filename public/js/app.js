@@ -42,6 +42,8 @@ let timerInterval = null;
 let serverNetworkInfo = null;
 let toastTimeout = null;
 let standingsData = null;
+let isToucheMode = localStorage.getItem("uag_touche_mode") !== "false";
+let showMoreActionsInToucheMode = false;
 
 document.addEventListener("DOMContentLoaded", () => {
   initTabs();
@@ -303,6 +305,7 @@ function flashCard(category) {
 function renderAll() {
   renderScoreboard();
   renderPlayerChips();
+  renderQuickNumberPad();
   renderPlayerSummary();
   renderActionsGrid();
   renderUndoButton();
@@ -366,6 +369,33 @@ function renderPlayerChips() {
     `;
 
     track.appendChild(chip);
+  });
+}
+
+function renderQuickNumberPad() {
+  const pad = document.getElementById("quick-number-pad");
+  if (!pad) return;
+  const players = matchState.players || [];
+  pad.innerHTML = "";
+  if (players.length === 0) return;
+
+  players.forEach(p => {
+    const btn = document.createElement("button");
+    const isActive = p.id === activePlayerId;
+    btn.className = `num-pad-btn ${isActive ? "active" : ""}`;
+    btn.dataset.id = p.id;
+    btn.innerHTML = `
+      <span class="num-pad-badge">#${p.number || "-"}</span>
+      <span class="num-pad-name">${p.name}</span>
+    `;
+    btn.onclick = () => {
+      activePlayerId = p.id;
+      if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
+      renderAll();
+      const chip = document.querySelector(`.player-chip[data-id="${p.id}"]`);
+      if (chip) chip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    };
+    pad.appendChild(btn);
   });
 }
 
@@ -438,58 +468,131 @@ function renderActionsGrid() {
 
   grid.innerHTML = "";
 
+  if (isToucheMode) {
+    // 6 GROS BOUTONS ERGONOMIQUES DU MODE TOUCHE
+    const toucheContainer = document.createElement("div");
+    toucheContainer.className = "touche-grid-6";
+
+    const toucheActions = [
+      { key: "tackles_made", label: "Plaquage Réussi", icon: "🛡️", cls: "touche-plaq-made" },
+      { key: "tackles_missed", label: "Plaquage Manqué", icon: "⚠️", cls: "touche-plaq-miss" },
+      { key: "turnovers_won", label: "Grattage Gagné", icon: "🧲", cls: "touche-grattage" },
+      { key: "turnovers_lost", label: "Balle Perdue", icon: "❌", cls: "touche-lost" },
+      { key: "penalties", label: "Pénalité", icon: "🚩", cls: "touche-penality" },
+      { key: "tries", label: "Essai UAG !", icon: "🏉", cls: "touche-try" }
+    ];
+
+    toucheActions.forEach(act => {
+      const btn = document.createElement("div");
+      btn.className = `btn-touche-big ${act.cls}`;
+      const count = stats[act.key] || 0;
+
+      btn.innerHTML = `
+        <div class="btn-touche-header">
+          <span class="btn-touche-icon">${act.icon}</span>
+          <span class="btn-touche-count">${count}</span>
+        </div>
+        <div class="btn-touche-bottom">
+          <span class="btn-touche-label">${act.label}</span>
+          ${count > 0 && !isTotal ? `<button class="btn-touche-minus" onclick="event.stopPropagation(); sendStatAction('${act.key}', -1)" title="Retirer 1">−</button>` : ''}
+        </div>
+      `;
+
+      btn.onclick = () => {
+        if (isTotal) {
+          alert("Mode consultation actif. Sélectionnez 1ère ou 2ème mi-temps pour saisir.");
+          return;
+        }
+        sendStatAction(act.key, 1);
+      };
+
+      toucheContainer.appendChild(btn);
+    });
+
+    grid.appendChild(toucheContainer);
+
+    // Bouton déroulant pour accéder aux autres actions
+    const toggleMoreBtn = document.createElement("button");
+    toggleMoreBtn.className = "touche-toggle-more";
+    toggleMoreBtn.textContent = showMoreActionsInToucheMode 
+      ? "▲ Masquer les autres actions" 
+      : "▼ Autres actions (Touches, Rucks, Cartons...)";
+    toggleMoreBtn.onclick = () => {
+      showMoreActionsInToucheMode = !showMoreActionsInToucheMode;
+      renderActionsGrid();
+    };
+    grid.appendChild(toggleMoreBtn);
+
+    if (showMoreActionsInToucheMode) {
+      const secondaryGrid = document.createElement("div");
+      secondaryGrid.className = "actions-grid";
+      const secondaryKeys = ["rucks_lost", "offensive_actions", "lineout_throws_made", "lineout_throws_lost", "yellow_cards", "minutes_played"];
+      ACTIONS.filter(a => secondaryKeys.includes(a.key)).forEach(action => {
+        renderStandardActionCard(secondaryGrid, action, stats, isTotal);
+      });
+      grid.appendChild(secondaryGrid);
+    }
+
+    return;
+  }
+
+  // MODE STANDARD COMPLET
   const filteredActions = ACTIONS.filter(a => {
     if (activePhaseFilter === "all") return true;
     return a.group === activePhaseFilter;
   });
 
   filteredActions.forEach(action => {
-    const card = document.createElement("div");
-    card.className = `action-card ${action.isHighlight ? "card-highlight" : ""}`;
-    card.dataset.cat = action.key;
-
-    if (action.isCardModal) {
-      const totalCards = (stats.yellow_cards || 0) + (stats.white_cards || 0) + (stats.red_cards || 0);
-      card.innerHTML = `
-        <div class="action-label-group">
-          <div class="action-name"><span>${action.icon}</span> ${action.label}</div>
-          <div class="action-sub">Blanc, Jaune ou Rouge</div>
-        </div>
-        <div class="action-controls">
-          <span class="action-val">${totalCards}</span>
-          <button class="btn-act btn-act-plus" ${isTotal ? "disabled style='opacity:0.3;'" : ""} onclick="openCardPicker()">+</button>
-        </div>
-      `;
-    } else if (action.isTime) {
-      const minVal = stats.minutes_played !== undefined ? stats.minutes_played : 40;
-      card.innerHTML = `
-        <div class="action-label-group">
-          <div class="action-name"><span>${action.icon}</span> ${action.label}</div>
-          <div class="action-sub">${action.sub}</div>
-        </div>
-        <div class="action-controls">
-          <button class="btn-act btn-act-minus" ${isTotal ? "disabled style='opacity:0.3;'" : ""} onclick="sendStatAction('minutes_played', -5)">−5</button>
-          <span class="action-val">${minVal}'</span>
-          <button class="btn-act btn-act-plus" ${isTotal ? "disabled style='opacity:0.3;'" : ""} onclick="sendStatAction('minutes_played', 5)">+5</button>
-        </div>
-      `;
-    } else {
-      const val = stats[action.key] || 0;
-      card.innerHTML = `
-        <div class="action-label-group">
-          <div class="action-name"><span>${action.icon}</span> ${action.label}</div>
-          <div class="action-sub">${action.sub}</div>
-        </div>
-        <div class="action-controls">
-          <button class="btn-act btn-act-minus" ${isTotal ? "disabled style='opacity:0.3;'" : ""} onclick="sendStatAction('${action.key}', -1)">−</button>
-          <span class="action-val">${val}</span>
-          <button class="btn-act btn-act-plus" ${isTotal ? "disabled style='opacity:0.3;'" : ""} onclick="sendStatAction('${action.key}', 1)">+</button>
-        </div>
-      `;
-    }
-
-    grid.appendChild(card);
+    renderStandardActionCard(grid, action, stats, isTotal);
   });
+}
+
+function renderStandardActionCard(container, action, stats, isTotal) {
+  const card = document.createElement("div");
+  card.className = `action-card ${action.isHighlight ? "card-highlight" : ""}`;
+  card.dataset.cat = action.key;
+
+  if (action.isCardModal) {
+    const totalCards = (stats.yellow_cards || 0) + (stats.white_cards || 0) + (stats.red_cards || 0);
+    card.innerHTML = `
+      <div class="action-label-group">
+        <div class="action-name"><span>${action.icon}</span> ${action.label}</div>
+        <div class="action-sub">Blanc, Jaune ou Rouge</div>
+      </div>
+      <div class="action-controls">
+        <span class="action-val">${totalCards}</span>
+        <button class="btn-act btn-act-plus" ${isTotal ? "disabled style='opacity:0.3;'" : ""} onclick="openCardPicker()">+</button>
+      </div>
+    `;
+  } else if (action.isTime) {
+    const minVal = stats.minutes_played !== undefined ? stats.minutes_played : 40;
+    card.innerHTML = `
+      <div class="action-label-group">
+        <div class="action-name"><span>${action.icon}</span> ${action.label}</div>
+        <div class="action-sub">${action.sub}</div>
+      </div>
+      <div class="action-controls">
+        <button class="btn-act btn-act-minus" ${isTotal ? "disabled style='opacity:0.3;'" : ""} onclick="sendStatAction('minutes_played', -5)">−5</button>
+        <span class="action-val">${minVal}'</span>
+        <button class="btn-act btn-act-plus" ${isTotal ? "disabled style='opacity:0.3;'" : ""} onclick="sendStatAction('minutes_played', 5)">+5</button>
+      </div>
+    `;
+  } else {
+    const val = stats[action.key] || 0;
+    card.innerHTML = `
+      <div class="action-label-group">
+        <div class="action-name"><span>${action.icon}</span> ${action.label}</div>
+        <div class="action-sub">${action.sub}</div>
+      </div>
+      <div class="action-controls">
+        <button class="btn-act btn-act-minus" ${isTotal ? "disabled style='opacity:0.3;'" : ""} onclick="sendStatAction('${action.key}', -1)">−</button>
+        <span class="action-val">${val}</span>
+        <button class="btn-act btn-act-plus" ${isTotal ? "disabled style='opacity:0.3;'" : ""} onclick="sendStatAction('${action.key}', 1)">+</button>
+      </div>
+    `;
+  }
+
+  container.appendChild(card);
 }
 
 function renderUndoButton() {
@@ -510,42 +613,149 @@ function renderUndoButton() {
 }
 
 /* ==========================================================================
-   VUE ÉQUIPE STAFF
+   VUE ÉQUIPE STAFF (LES 3 CHIFFRES CLÉS DU COACH)
    ========================================================================== */
 function renderTeamKPIs() {
   const players = matchState.players || [];
-  let topTackler = { name: "-", count: 0 };
-  let topScorer = { name: "-", count: 0 };
-  let totalTMade = 0, totalTMiss = 0, totalLMade = 0, totalLMiss = 0;
+  let totalTMade = 0, totalTMiss = 0, totalPenalties = 0;
+  let totalTurnWon = 0, totalTurnLost = 0;
+  let totalLMade = 0, totalLMiss = 0;
+  let whiteCards = 0, yellowCards = 0, redCards = 0;
+
+  const tacklers = [];
 
   players.forEach(p => {
     const s = getPlayerStats(p, activeHalf);
     const tMade = s.tackles_made || 0;
     const tMiss = s.tackles_missed || 0;
-    const tries = s.tries || 0;
-
     totalTMade += tMade;
     totalTMiss += tMiss;
-    totalLMade += s.lineout_throws_made || 0;
-    totalLMiss += s.lineout_throws_lost || 0;
+    totalPenalties += (s.penalties || 0);
+    totalTurnWon += (s.turnovers_won || 0);
+    totalTurnLost += (s.turnovers_lost || 0);
+    totalLMade += (s.lineout_throws_made || 0);
+    totalLMiss += (s.lineout_throws_lost || 0);
+    whiteCards += (s.white_cards || 0);
+    yellowCards += (s.yellow_cards || 0);
+    redCards += (s.red_cards || 0);
 
-    if (tMade > topTackler.count) topTackler = { name: `${p.name} (#${p.number})`, count: tMade };
-    if (tries > topScorer.count) topScorer = { name: `${p.name} (#${p.number})`, count: tries };
+    if (tMade > 0) {
+      tacklers.push({ name: p.name, number: p.number, count: tMade });
+    }
   });
 
-  const topTacklerEl = document.getElementById("summary-top-tackler");
-  const topScorerEl = document.getElementById("summary-top-scorer");
-  const teamTackEl = document.getElementById("summary-team-tackles-rate");
-  const teamLineEl = document.getElementById("summary-team-lineout-rate");
-
-  if (topTacklerEl) topTacklerEl.textContent = topTackler.count > 0 ? `${topTackler.name} (${topTackler.count})` : "-";
-  if (topScorerEl) topScorerEl.textContent = topScorer.count > 0 ? `${topScorer.name} (${topScorer.count})` : "-";
-
+  // 1. CARTE EFFICACITÉ AU PLAQUAGE
   const tTot = totalTMade + totalTMiss;
-  if (teamTackEl) teamTackEl.textContent = tTot > 0 ? Math.round((totalTMade / tTot) * 100) + "%" : "0%";
+  const tRate = tTot > 0 ? Math.round((totalTMade / tTot) * 100) : 0;
+  const rateEl = document.getElementById("coach-tackles-rate");
+  const subEl = document.getElementById("coach-tackles-sub");
+  const barEl = document.getElementById("coach-tackles-bar");
+  const badgeDefEl = document.getElementById("coach-badge-defense");
 
+  if (rateEl) rateEl.textContent = tTot > 0 ? `${tRate}%` : "-";
+  if (subEl) subEl.textContent = `${totalTMade} réussis / ${totalTMiss} manqués`;
+  if (barEl) {
+    barEl.style.width = `${tRate}%`;
+    barEl.style.background = tRate >= 80 ? "var(--uag-green)" : (tRate >= 65 ? "var(--uag-gold)" : "var(--uag-danger)");
+  }
+  if (badgeDefEl) {
+    if (tTot === 0) {
+      badgeDefEl.textContent = "À démarrer";
+      badgeDefEl.className = "coach-kpi-badge";
+    } else if (tRate >= 80) {
+      badgeDefEl.textContent = "Solide 🛡️";
+      badgeDefEl.className = "coach-kpi-badge badge-green";
+    } else if (tRate >= 65) {
+      badgeDefEl.textContent = "Correct ⚠️";
+      badgeDefEl.className = "coach-kpi-badge badge-gold";
+    } else {
+      badgeDefEl.textContent = "Fragile 🛑";
+      badgeDefEl.className = "coach-kpi-badge badge-red";
+    }
+  }
+
+  // 2. CARTE DISCIPLINE
+  const penEl = document.getElementById("coach-penalties-count");
+  const penSubEl = document.getElementById("coach-penalties-sub");
+  const discBadgeEl = document.getElementById("coach-badge-discipline");
+  const cardsIconEl = document.getElementById("coach-cards-icons");
+
+  if (penEl) penEl.textContent = totalPenalties;
+  if (penSubEl) penSubEl.textContent = totalPenalties <= 1 ? "pénalité concédée" : "pénalités concédées";
+  if (discBadgeEl) {
+    if (totalPenalties <= 3) {
+      discBadgeEl.textContent = "Impeccable 🟢";
+      discBadgeEl.className = "coach-kpi-badge badge-green";
+    } else if (totalPenalties <= 6) {
+      discBadgeEl.textContent = "Correct ⚠️";
+      discBadgeEl.className = "coach-kpi-badge badge-gold";
+    } else {
+      discBadgeEl.textContent = "Trop de fautes 🛑";
+      discBadgeEl.className = "coach-kpi-badge badge-red";
+    }
+  }
+  if (cardsIconEl) {
+    const totalCards = whiteCards + yellowCards + redCards;
+    if (totalCards === 0) {
+      cardsIconEl.innerHTML = `<span class="badge-no-card">✓ 0 carton</span>`;
+    } else {
+      let cardsHtml = "";
+      if (whiteCards > 0) cardsHtml += `<span class="card-tag card-tag-white">${whiteCards} B</span> `;
+      if (yellowCards > 0) cardsHtml += `<span class="card-tag card-tag-yellow">${yellowCards} J</span> `;
+      if (redCards > 0) cardsHtml += `<span class="card-tag card-tag-red">${redCards} R</span> `;
+      cardsIconEl.innerHTML = cardsHtml;
+    }
+  }
+
+  // 3. CARTE COMBAT & BALLONS (GRATTAGES VS PERTES)
+  const diffBallons = totalTurnWon - totalTurnLost;
+  const balanceEl = document.getElementById("coach-turnover-balance");
+  const balanceSubEl = document.getElementById("coach-turnover-sub");
+  const balanceBadgeEl = document.getElementById("coach-badge-turnovers");
+  const lineoutPctEl = document.getElementById("coach-lineout-pct");
+
+  if (balanceEl) {
+    balanceEl.textContent = diffBallons > 0 ? `+${diffBallons}` : `${diffBallons}`;
+    balanceEl.style.color = diffBallons > 0 ? "var(--uag-green)" : (diffBallons < 0 ? "var(--uag-danger)" : "#fff");
+  }
+  if (balanceSubEl) balanceSubEl.textContent = `${totalTurnWon} grattages / ${totalTurnLost} pertes`;
+  if (balanceBadgeEl) {
+    if (diffBallons > 0) {
+      balanceBadgeEl.textContent = `+${diffBallons} ballons 💥`;
+      balanceBadgeEl.className = "coach-kpi-badge badge-green";
+    } else if (diffBallons === 0) {
+      balanceBadgeEl.textContent = "Équilibré";
+      balanceBadgeEl.className = "coach-kpi-badge badge-gold";
+    } else {
+      balanceBadgeEl.textContent = `${diffBallons} ballons ⚠️`;
+      balanceBadgeEl.className = "coach-kpi-badge badge-red";
+    }
+  }
   const lTot = totalLMade + totalLMiss;
-  if (teamLineEl) teamLineEl.textContent = lTot > 0 ? Math.round((totalLMade / lTot) * 100) + "%" : "0%";
+  if (lineoutPctEl) {
+    lineoutPctEl.textContent = lTot > 0 ? `${Math.round((totalLMade / lTot) * 100)}% (${totalLMade}/${lTot})` : "-";
+  }
+
+  // 4. PODIUM TOP 3 DU VESTIAIRE
+  const podiumEl = document.getElementById("coach-podium-list");
+  if (podiumEl) {
+    tacklers.sort((a, b) => b.count - a.count);
+    const top3 = tacklers.slice(0, 3);
+    if (top3.length === 0) {
+      podiumEl.innerHTML = `<span style="color:var(--text-muted); font-size:0.75rem;">En attente des premiers plaquages...</span>`;
+    } else {
+      const medals = ["🥇", "🥈", "🥉"];
+      podiumEl.innerHTML = top3.map((t, i) => `
+        <div class="podium-item">
+          <span class="podium-medal">${medals[i]}</span>
+          <div>
+            <div class="podium-player-name">${t.name} <small style="color:var(--text-muted);">#${t.number || ""}</small></div>
+            <div class="podium-player-count"><strong>${t.count}</strong> plaquages</div>
+          </div>
+        </div>
+      `).join("");
+    }
+  }
 }
 
 function renderTeamTable() {
@@ -761,6 +971,21 @@ function initUIEvents() {
   // Undo buttons
   document.getElementById("btn-undo-action")?.addEventListener("click", sendUndoAction);
   document.getElementById("btn-toast-undo")?.addEventListener("click", sendUndoAction);
+
+  // Mode Touche Toggle
+  const btnTouche = document.getElementById("btn-toggle-touche-mode");
+  const labelTouche = document.getElementById("label-touche-mode");
+  if (btnTouche) {
+    btnTouche.classList.toggle("active", isToucheMode);
+    if (labelTouche) labelTouche.textContent = isToucheMode ? "Mode Touche" : "Mode Complet";
+    btnTouche.addEventListener("click", () => {
+      isToucheMode = !isToucheMode;
+      localStorage.setItem("uag_touche_mode", isToucheMode);
+      btnTouche.classList.toggle("active", isToucheMode);
+      if (labelTouche) labelTouche.textContent = isToucheMode ? "Mode Touche" : "Mode Complet";
+      renderActionsGrid();
+    });
+  }
 
   // Export CSV
   document.getElementById("btn-export-csv")?.addEventListener("click", exportCSV);
