@@ -858,6 +858,67 @@ body {
 
 .btn-danger-soft {
   color: var(--uag-danger);
+}
+
+.settings-players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.player-manage-item {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.player-manage-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-manage-num {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+
+.player-manage-name {
+  font-weight: 700;
+  color: #fff;
+}
+
+.player-manage-pos {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.btn-delete-player {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--uag-danger);
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-delete-player:hover {
+  background: var(--uag-danger);
+  color: #fff;
+}
   border-color: rgba(239, 68, 68, 0.2);
 }
 

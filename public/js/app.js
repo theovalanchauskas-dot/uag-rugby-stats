@@ -297,6 +297,7 @@ function renderAll() {
   renderTeamTable();
   renderTeamKPIs();
   renderLiveFeed();
+  renderSettingsPlayersList();
 }
 
 function renderScoreboard() {
@@ -966,9 +967,61 @@ function exportCSV() {
   URL.revokeObjectURL(url);
 }
 
+function renderSettingsPlayersList() {
+  const container = document.getElementById("settings-players-list");
+  const countEl = document.getElementById("settings-players-count");
+  const players = matchState.players || [];
+  if (countEl) countEl.textContent = players.length;
+  if (!container) return;
+  container.innerHTML = "";
+  if (players.length === 0) {
+    container.innerHTML = `<div style="color:var(--text-muted); font-size:0.8rem; padding:8px 0;">Aucune joueuse enregistrée.</div>`;
+    return;
+  }
+  players.forEach(p => {
+    const item = document.createElement("div");
+    item.className = "player-manage-item";
+    const cleanName = (p.name || "").replace(/'/g, "\\'");
+    item.innerHTML = `
+      <div class="player-manage-info">
+        <span class="player-manage-num">#${p.number !== undefined ? p.number : "-"}</span>
+        <span class="player-manage-name">${p.name || "Sans nom"}</span>
+        <span class="player-manage-pos">${p.position || "Joueuse"}</span>
+      </div>
+      <button class="btn-delete-player" onclick="deletePlayer('${p.id}', '${cleanName}')" title="Supprimer cette joueuse">
+        🗑 Supprimer
+      </button>
+    `;
+    container.appendChild(item);
+  });
+}
+
+async function deletePlayer(playerId, playerName) {
+  if (confirm(`Supprimer ${playerName} de la feuille de match ?`)) {
+    try {
+      const res = await fetch("/api/player/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: playerId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        matchState = data.state;
+        if (activePlayerId === playerId) {
+          activePlayerId = matchState.players && matchState.players.length > 0 ? matchState.players[0].id : "";
+        }
+        renderAll();
+      }
+    } catch (err) {
+      console.error("Erreur suppression:", err);
+    }
+  }
+}
+
 // Global exposure
 window.switchTab = switchTab;
 window.sendStatAction = sendStatAction;
 window.addPointsToTeam = addPointsToTeam;
 window.openCardPicker = openCardPicker;
 window.submitCardAction = submitCardAction;
+window.deletePlayer = deletePlayer;
