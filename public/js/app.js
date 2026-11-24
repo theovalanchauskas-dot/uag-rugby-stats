@@ -1385,7 +1385,7 @@ function renderStandings() {
           ${t.is_uag ? '<span class="uag-tag-mini">UAG</span>' : ''}
         </div>
       </td>
-      <td style="text-align:center; font-weight:800; color:#fff; font-size:0.95rem;">${t.points}</td>
+      <td style="text-align:center;" class="cell-points">${t.points}</td>
       <td style="text-align:center;">${t.played}</td>
       <td style="text-align:center; color:var(--uag-green); font-weight:600;">${t.won}</td>
       <td style="text-align:center; color:var(--uag-gold);">${t.drawn}</td>

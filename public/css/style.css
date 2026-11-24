@@ -1159,8 +1159,7 @@ body {
 .btn-delete-player:hover {
   background: var(--uag-danger);
   color: #fff;
-}
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: var(--uag-danger);
 }
 
 .quick-actions-grid {
@@ -1606,11 +1605,21 @@ body {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 6px;
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.cell-points {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
 }
 
 .rank-top4 {
@@ -2048,10 +2057,12 @@ body {
 }
 
 .coach-kpi-big {
-  font-size: 1.6rem;
+  font-family: var(--font-display);
+  font-size: 1.85rem;
   font-weight: 900;
   color: #fff;
   line-height: 1;
+  letter-spacing: 0.5px;
 }
 
 .coach-kpi-sub {
@@ -2099,20 +2110,25 @@ body {
 
 /* PODIUM DU VESTIAIRE */
 .coach-podium-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: linear-gradient(135deg, rgba(25, 28, 38, 0.95) 0%, rgba(17, 19, 26, 0.98) 100%);
+  border: 1px solid rgba(229, 169, 60, 0.3);
   border-radius: var(--radius-md);
   padding: 12px 14px;
   margin-bottom: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 .podium-title {
-  font-size: 0.78rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 900;
   color: var(--uag-gold);
   margin-bottom: 8px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .podium-row {
@@ -2124,19 +2140,21 @@ body {
 
 .podium-item {
   flex: 1;
-  min-width: 120px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  min-width: 125px;
+  background: linear-gradient(145deg, #202331 0%, #161823 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
   padding: 8px 10px;
   display: flex;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .podium-medal {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
 }
 
 .podium-player-name {
@@ -2147,6 +2165,234 @@ body {
 }
 
 .podium-player-count {
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--uag-gold);
+}
+
+/* ==========================================================================
+   MODE PLEIN SOLEIL (HAUT CONTRASTE STADE & BORD DE TERRAIN)
+   Activé via le bouton soleil dans le header pour une lisibilité parfaite
+   en plein soleil avec reflets sur l'écran du téléphone.
+   ========================================================================== */
+body.sunlight-mode {
+  --bg-main: #EEF2F6;
+  --bg-card: #FFFFFF;
+  --bg-surface: #E2E8F0;
+  --bg-subtle: rgba(0, 0, 0, 0.04);
+  --border-color: #CBD5E1;
+  --border-light: #E2E8F0;
+  --text-main: #0B1120;
+  --text-muted: #475569;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+body.sunlight-mode .app-header {
+  background: #FFFFFF;
+  border-bottom: 2px solid #CBD5E1;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+body.sunlight-mode .header-title {
+  color: #0B1120;
+}
+
+body.sunlight-mode .score-pill {
+  background: #F8FAFC;
+  border: 1.5px solid #CBD5E1;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+body.sunlight-mode .score-val {
+  color: #0F172A;
+  text-shadow: none;
+}
+
+body.sunlight-mode .score-team-uag {
+  background: var(--uag-red);
+  color: #FFFFFF !important;
+}
+
+body.sunlight-mode .timer-pill {
+  background: #F1F5F9;
+  border: 1.5px solid #CBD5E1;
+  color: #0F172A;
+  box-shadow: none;
+}
+
+body.sunlight-mode .btn-icon-ghost {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+  color: #334155;
+}
+
+body.sunlight-mode .action-card {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+body.sunlight-mode .action-card.card-highlight {
+  border-color: #F59E0B;
+  background: #FFFBEB;
+}
+
+body.sunlight-mode .action-val {
+  color: #0F172A;
+}
+
+body.sunlight-mode .action-title {
+  color: #0F172A;
+}
+
+body.sunlight-mode .action-sub {
+  color: #64748B;
+}
+
+body.sunlight-mode .btn-act-minus {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+  color: #334155;
+  box-shadow: 0 3px 0 #CBD5E1;
+}
+
+body.sunlight-mode .btn-act-minus:active {
+  box-shadow: 0 1px 0 #CBD5E1;
+}
+
+body.sunlight-mode .btn-act-plus {
+  box-shadow: 0 3px 0 #9E1020, 0 4px 10px rgba(217, 4, 41, 0.25);
+}
+
+body.sunlight-mode .player-chip {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+body.sunlight-mode .player-chip.active {
+  background: #FEE2E2;
+  border-color: var(--uag-red);
+}
+
+body.sunlight-mode .player-chip.active .chip-name {
+  color: var(--uag-red);
+}
+
+body.sunlight-mode .num-pad-btn {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  color: #0F172A;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+body.sunlight-mode .num-pad-btn.active {
+  background: #FEF3C7;
+  border-color: #D97706;
+  color: #92400E;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
+}
+
+body.sunlight-mode .num-pad-name {
+  color: #0F172A;
+}
+
+body.sunlight-mode .app-bottom-nav {
+  background: #FFFFFF;
+  border-top: 2px solid #CBD5E1;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+body.sunlight-mode .nav-tab-item {
+  color: #64748B;
+}
+
+body.sunlight-mode .nav-tab-item.active {
+  color: var(--uag-red);
+}
+
+body.sunlight-mode .coach-kpi-card,
+body.sunlight-mode .coach-podium-card,
+body.sunlight-mode .history-card,
+body.sunlight-mode .standings-header-card,
+body.sunlight-mode .standings-table-card,
+body.sunlight-mode .team-panel,
+body.sunlight-mode .card,
+body.sunlight-mode .match-config-card {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+body.sunlight-mode .coach-kpi-title,
+body.sunlight-mode .coach-kpi-big,
+body.sunlight-mode .podium-player-name,
+body.sunlight-mode .card-title,
+body.sunlight-mode .history-title,
+body.sunlight-mode .standings-title,
+body.sunlight-mode .player-card-num,
+body.sunlight-mode .player-card-name {
+  color: #0B1120;
+}
+
+body.sunlight-mode .podium-item {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+body.sunlight-mode .standings-table th {
+  color: #475569;
+  border-bottom: 2px solid #CBD5E1;
+  background: #F8FAFC;
+}
+
+body.sunlight-mode .standings-table td {
+  color: #0F172A;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+body.sunlight-mode .standings-table tr:nth-child(even) {
+  background: #F8FAFC;
+}
+
+body.sunlight-mode .row-uag {
+  background: #FEE2E2 !important;
+  border-left: 4px solid var(--uag-red) !important;
+}
+
+body.sunlight-mode .row-uag td {
+  color: #991B1B !important;
+  font-weight: 800;
+}
+
+body.sunlight-mode .touche-mode-container {
+  background: transparent;
+}
+
+body.sunlight-mode .btn-touche-minus {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+body.sunlight-mode .modal-card {
+  background: #FFFFFF;
+  border: 2px solid #CBD5E1;
+  color: #0B1120;
+}
+
+body.sunlight-mode .modal-card h3,
+body.sunlight-mode .modal-card label,
+body.sunlight-mode .player-name-text {
+  color: #0B1120;
+}
+
+body.sunlight-mode .player-card {
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+}
+
+body.sunlight-mode .empty-history {
+  color: #64748B;
 }
