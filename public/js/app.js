@@ -33,6 +33,15 @@ let matchState = {
 
 let activePlayerId = "p1";
 let selectedPlayerIds = ["p1"];
+let myAssignedPlayerIds = [];
+try {
+  const saved = localStorage.getItem("uag_my_players");
+  if (saved) {
+    myAssignedPlayerIds = JSON.parse(saved);
+  }
+} catch (e) {
+  myAssignedPlayerIds = [];
+}
 let activeHalf = "first"; // "first", "second", "total"
 let activePhaseFilter = "all";
 let activePosFilter = "all";
@@ -226,9 +235,9 @@ async function sendStatAction(category, delta) {
     return;
   }
 
-  if (selectedPlayerIds.length === 0) {
-    alert("Veuillez sélectionner au moins une joueuse dans le menu déroulant.");
-    openPlayerDropdown();
+  if (!activePlayerId) {
+    alert("Veuillez sélectionner une joueuse dans votre bandeau.");
+    openGroupModal();
     return;
   }
 
@@ -241,7 +250,8 @@ async function sendStatAction(category, delta) {
   }
 
   const payload = {
-    playerIds: selectedPlayerIds,
+    playerId: activePlayerId,
+    playerIds: [activePlayerId],
     half: activeHalf,
     category: category,
     delta: delta,
@@ -328,10 +338,7 @@ function triggerCountPop(category) {
 function renderAll() {
   updateToucheModeUI();
   renderScoreboard();
-  renderPlayerDropdown();
-  renderPlayerChips();
-  renderQuickNumberPad();
-  renderPlayerSummary();
+  renderAssignedPlayersSection();
   renderActionsGrid();
   renderUndoButton();
   renderTeamTable();
@@ -375,88 +382,158 @@ function renderScoreboard() {
   if (modalOppLbl) modalOppLbl.textContent = (m.opponent || "ADVERSAIRE").toUpperCase();
 }
 
-function renderPlayerDropdown() {
-  const container = document.getElementById("player-dropdown-container");
-  if (!container) return;
-
+/* ==========================================================================
+   BANDEAU DES JOUEUSES ASSIGNÉES (PARTAGE ENTRE BLESSÉES SUR LA TOUCHE)
+   ========================================================================== */
+function renderAssignedPlayersSection() {
   const players = matchState.players || [];
   if (players.length === 0) return;
 
-  // Filtrer les IDs sélectionnés qui n'existent plus
-  selectedPlayerIds = selectedPlayerIds.filter(id => players.some(p => p.id === id));
-  if (selectedPlayerIds.length === 0 && players.length > 0) {
-    selectedPlayerIds = [players[0].id];
+  // Si aucun joueur assigné en mémoire, initialiser avec les 5 premières
+  if (!myAssignedPlayerIds || myAssignedPlayerIds.length === 0) {
+    myAssignedPlayerIds = players.slice(0, 5).map(p => p.id);
+    try {
+      localStorage.setItem("uag_my_players", JSON.stringify(myAssignedPlayerIds));
+    } catch (e) {}
   }
-  activePlayerId = selectedPlayerIds[0] || (players[0] ? players[0].id : "");
 
-  renderDropdownSelectedDisplay();
-  renderDropdownPlayersList();
+  // Filtrer les IDs qui n'existent plus
+  myAssignedPlayerIds = myAssignedPlayerIds.filter(id => players.some(p => p.id === id));
+  if (myAssignedPlayerIds.length === 0 && players.length > 0) {
+    myAssignedPlayerIds = [players[0].id];
+  }
+
+  // Vérifier activePlayerId
+  if (!activePlayerId || !myAssignedPlayerIds.includes(activePlayerId)) {
+    activePlayerId = myAssignedPlayerIds[0] || (players[0] ? players[0].id : "");
+  }
+
+  // Mettre à jour le badge de compteur
+  const countBadge = document.getElementById("assigned-count-pill");
+  if (countBadge) {
+    countBadge.textContent = myAssignedPlayerIds.length;
+  }
+
+  renderAssignedPlayersStrip();
+  renderActivePlayerBanner();
 }
 
-function renderDropdownSelectedDisplay() {
-  const display = document.getElementById("dropdown-selected-display");
-  if (!display) return;
+function renderAssignedPlayersStrip() {
+  const strip = document.getElementById("assigned-players-strip");
+  if (!strip) return;
 
   const players = matchState.players || [];
-  const selected = players.filter(p => selectedPlayerIds.includes(p.id));
+  strip.innerHTML = "";
 
-  if (selected.length === 1) {
-    const p = selected[0];
-    const stats = getPlayerStats(p, activeHalf);
-    const tMade = stats.tackles_made || 0;
-    const tMiss = stats.tackles_missed || 0;
-    const tTot = tMade + tMiss;
-    const tRate = tTot > 0 ? Math.round((tMade / tTot) * 100) : 0;
-    const tries = stats.tries || 0;
-    const turnWon = stats.turnovers_won || 0;
-
-    display.innerHTML = `
-      <div class="dropdown-trigger-jersey">
-        <div class="rugby-jersey-mini jersey-active">
-          <span class="jersey-mini-num">${p.number || "-"}</span>
-        </div>
-      </div>
-      <div class="dropdown-trigger-info">
-        <div class="dropdown-trigger-name">${p.name} <span class="dropdown-trigger-pos">(${p.position || "Joueuse"})</span></div>
-        <div class="dropdown-trigger-stats">
-          ${tTot > 0 ? `🛡️ ${tRate}% plaquages (${tMade}/${tTot})` : `0 plaquage`} • 🏉 ${tries} essai${tries > 1 ? "s" : ""} • 🧲 ${turnWon} grattage${turnWon > 1 ? "s" : ""}
-        </div>
-      </div>
-    `;
-  } else if (selected.length > 1) {
-    const numbers = selected.map(p => `#${p.number || "-"}`).join(", ");
-    const names = selected.map(p => p.name).join(", ");
-    display.innerHTML = `
-      <div class="dropdown-trigger-jersey group-jersey">
-        <span>👥</span>
-      </div>
-      <div class="dropdown-trigger-info">
-        <div class="dropdown-trigger-name">
-          <strong>${selected.length} joueuses sélectionnées</strong>
-          <span class="dropdown-trigger-pos">(${numbers})</span>
-        </div>
-        <div class="dropdown-trigger-stats">${names}</div>
-      </div>
-    `;
-  } else {
-    display.innerHTML = `
-      <div class="dropdown-trigger-jersey">
-        <span style="font-size:1.3rem;">⚠️</span>
-      </div>
-      <div class="dropdown-trigger-info">
-        <div class="dropdown-trigger-name" style="color:var(--uag-gold);">Aucune joueuse sélectionnée</div>
-        <div class="dropdown-trigger-stats">Cliquez pour choisir une ou plusieurs joueuses</div>
-      </div>
-    `;
+  if (myAssignedPlayerIds.length === 0) {
+    const emptyPrompt = document.createElement("div");
+    emptyPrompt.className = "assigned-empty-prompt";
+    emptyPrompt.innerHTML = `<span>👥</span> <span>Aucune joueuse suivie. Touchez ici pour choisir vos joueuses</span>`;
+    emptyPrompt.onclick = openGroupModal;
+    strip.appendChild(emptyPrompt);
+    return;
   }
 
-  const footerSummary = document.getElementById("dropdown-footer-summary");
-  if (footerSummary) {
-    footerSummary.textContent = `${selected.length} joueuse${selected.length > 1 ? "s" : ""} sélectionnée${selected.length > 1 ? "s" : ""}`;
+  myAssignedPlayerIds.forEach(id => {
+    const p = players.find(x => x.id === id);
+    if (!p) return;
+
+    const isActive = (p.id === activePlayerId);
+    const stats = getPlayerStats(p, activeHalf);
+    const tMade = stats.tackles_made || 0;
+    const tries = stats.tries || 0;
+
+    const badge = document.createElement("div");
+    badge.className = `assigned-player-badge ${isActive ? "active" : ""}`;
+    badge.title = `Sélectionner ${p.name} (#${p.number || "-"})`;
+    badge.onclick = () => setActivePlayer(p.id);
+
+    badge.innerHTML = `
+      <div class="rugby-jersey-mini ${isActive ? "jersey-active" : ""}">
+        <span class="jersey-mini-num">${p.number || "-"}</span>
+      </div>
+      <span class="assigned-badge-name">${p.name}</span>
+      <span class="assigned-badge-stat">${tMade} plq${tries > 0 ? ` • ${tries} 🏉` : ""}</span>
+      ${isActive ? `<span class="assigned-badge-active-dot" title="Active"></span>` : ""}
+    `;
+
+    strip.appendChild(badge);
+  });
+}
+
+function setActivePlayer(id) {
+  activePlayerId = id;
+  if (!myAssignedPlayerIds.includes(id)) {
+    myAssignedPlayerIds.push(id);
+    try {
+      localStorage.setItem("uag_my_players", JSON.stringify(myAssignedPlayerIds));
+    } catch (e) {}
+  }
+  renderAssignedPlayersStrip();
+  renderActivePlayerBanner();
+  renderActionsGrid();
+  if (navigator.vibrate) {
+    try { navigator.vibrate(15); } catch (e) {}
   }
 }
 
-function renderDropdownPlayersList() {
+function renderActivePlayerBanner() {
+  const banner = document.getElementById("active-player-banner");
+  if (!banner) return;
+
+  const players = matchState.players || [];
+  const p = players.find(x => x.id === activePlayerId);
+
+  if (!p) {
+    banner.innerHTML = `
+      <div class="active-banner-left">
+        <span style="font-size:1.1rem;">⚠️</span>
+        <span class="active-banner-name" style="color:var(--uag-gold);">Aucune joueuse active</span>
+      </div>
+      <button type="button" class="btn-manage-group" onclick="openGroupModal()">Choisir</button>
+    `;
+    return;
+  }
+
+  const stats = getPlayerStats(p, activeHalf);
+  const tMade = stats.tackles_made || 0;
+  const tMiss = stats.tackles_missed || 0;
+  const tTot = tMade + tMiss;
+  const tRate = tTot > 0 ? Math.round((tMade / tTot) * 100) : 0;
+  const tries = stats.tries || 0;
+  const turnWon = stats.turnovers_won || 0;
+
+  banner.innerHTML = `
+    <div class="active-banner-left">
+      <div class="rugby-jersey-mini jersey-active">
+        <span class="jersey-mini-num">${p.number || "-"}</span>
+      </div>
+      <span class="active-banner-name">${p.name}</span>
+      <span class="active-banner-pos">${p.position || "Joueuse"}</span>
+    </div>
+    <div class="active-banner-stats">
+      ${tTot > 0 ? `🛡️ ${tRate}% (${tMade}/${tTot})` : `🛡️ 0 plq`} • 🏉 ${tries} essai${tries > 1 ? "s" : ""} • 🧲 ${turnWon} grattage${turnWon > 1 ? "s" : ""}
+    </div>
+  `;
+}
+
+/* ==========================================================================
+   MODALE DU CHOIX DU GROUPE DE JOUEUSES
+   ========================================================================== */
+function openGroupModal() {
+  const modal = document.getElementById("group-modal-backdrop");
+  if (!modal) return;
+  modal.style.display = "flex";
+  renderGroupModalList();
+}
+
+function closeGroupModal() {
+  const modal = document.getElementById("group-modal-backdrop");
+  if (!modal) return;
+  modal.style.display = "none";
+}
+
+function renderGroupModalList() {
   const list = document.getElementById("dropdown-players-list");
   if (!list) return;
 
@@ -464,115 +541,126 @@ function renderDropdownPlayersList() {
   list.innerHTML = "";
 
   players.forEach(p => {
-    const isSelected = selectedPlayerIds.includes(p.id);
+    const isChecked = myAssignedPlayerIds.includes(p.id);
     const stats = getPlayerStats(p, activeHalf);
     const tMade = stats.tackles_made || 0;
 
     const row = document.createElement("div");
-    row.className = `dropdown-player-row ${isSelected ? "selected" : ""}`;
-    row.onclick = () => togglePlayerSelection(p.id);
+    row.className = `group-player-row ${isChecked ? "selected" : ""}`;
+    row.onclick = () => toggleAssignedPlayer(p.id);
 
     row.innerHTML = `
-      <input type="checkbox" class="dropdown-player-checkbox" ${isSelected ? "checked" : ""} onclick="event.stopPropagation(); togglePlayerSelection('${p.id}');">
-      <div class="rugby-jersey-mini ${isSelected ? "jersey-active" : ""}">
+      <input type="checkbox" class="group-player-checkbox" ${isChecked ? "checked" : ""} onclick="event.stopPropagation(); toggleAssignedPlayer('${p.id}');">
+      <div class="rugby-jersey-mini ${isChecked ? "jersey-active" : ""}">
         <span class="jersey-mini-num">${p.number || "-"}</span>
       </div>
-      <div class="dropdown-player-meta">
-        <span class="dropdown-player-name">${p.name}</span>
-        <span class="dropdown-player-pos">${p.position || "Joueuse"}</span>
+      <div class="group-player-meta">
+        <span class="group-player-name">${p.name}</span>
+        <span class="group-player-pos">${p.position || "Joueuse"}</span>
       </div>
-      <div class="dropdown-player-quickstat">
+      <div class="group-player-quickstat">
         ${tMade} plq
       </div>
-      <button type="button" class="btn-select-only" onclick="event.stopPropagation(); selectOnlyPlayer('${p.id}')">
+      <button type="button" class="btn-select-only" onclick="event.stopPropagation(); selectOnlyAssignedPlayer('${p.id}')">
         Seule
       </button>
     `;
 
     list.appendChild(row);
   });
+
+  const summary = document.getElementById("dropdown-footer-summary");
+  if (summary) {
+    summary.textContent = `${myAssignedPlayerIds.length} joueuse${myAssignedPlayerIds.length > 1 ? "s" : ""} dans mon bandeau`;
+  }
 }
 
-function togglePlayerSelection(id) {
-  if (selectedPlayerIds.includes(id)) {
-    selectedPlayerIds = selectedPlayerIds.filter(x => x !== id);
+function toggleAssignedPlayer(id) {
+  if (myAssignedPlayerIds.includes(id)) {
+    myAssignedPlayerIds = myAssignedPlayerIds.filter(x => x !== id);
+    if (activePlayerId === id) {
+      activePlayerId = myAssignedPlayerIds[0] || "";
+    }
   } else {
-    selectedPlayerIds.push(id);
+    myAssignedPlayerIds.push(id);
+    if (!activePlayerId) {
+      activePlayerId = id;
+    }
   }
-  activePlayerId = selectedPlayerIds[0] || "";
-  renderPlayerDropdown();
+  try {
+    localStorage.setItem("uag_my_players", JSON.stringify(myAssignedPlayerIds));
+  } catch (e) {}
+
+  renderGroupModalList();
+  renderAssignedPlayersSection();
   renderActionsGrid();
   if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) {} }
 }
 
-function selectOnlyPlayer(id) {
-  selectedPlayerIds = [id];
+function selectOnlyAssignedPlayer(id) {
+  myAssignedPlayerIds = [id];
   activePlayerId = id;
-  closePlayerDropdown();
-  renderAll();
-  if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
-}
+  try {
+    localStorage.setItem("uag_my_players", JSON.stringify(myAssignedPlayerIds));
+  } catch (e) {}
 
-function selectPlayerPreset(preset) {
-  const players = matchState.players || [];
-  if (preset === "all") {
-    selectedPlayerIds = players.map(p => p.id);
-  } else if (preset === "forwards") {
-    selectedPlayerIds = players.filter(p => (p.number || 0) >= 1 && (p.number || 0) <= 8).map(p => p.id);
-    if (selectedPlayerIds.length === 0) {
-      selectedPlayerIds = players.slice(0, 8).map(p => p.id);
-    }
-  } else if (preset === "backs") {
-    selectedPlayerIds = players.filter(p => (p.number || 0) >= 9).map(p => p.id);
-    if (selectedPlayerIds.length === 0) {
-      selectedPlayerIds = players.slice(8).map(p => p.id);
-    }
-  } else if (preset === "clear") {
-    selectedPlayerIds = [];
-  }
-  activePlayerId = selectedPlayerIds[0] || "";
-  renderPlayerDropdown();
+  closeGroupModal();
+  renderAssignedPlayersSection();
   renderActionsGrid();
   if (navigator.vibrate) { try { navigator.vibrate(25); } catch (e) {} }
 }
 
-function clearPlayerSelection() {
-  selectPlayerPreset("clear");
-}
-
-function togglePlayerDropdown() {
-  const menu = document.getElementById("player-dropdown-menu");
-  const trigger = document.getElementById("btn-player-dropdown-trigger");
-  if (!menu || !trigger) return;
-
-  const isOpen = menu.style.display !== "none";
-  if (isOpen) {
-    closePlayerDropdown();
-  } else {
-    openPlayerDropdown();
+function setAssignedPreset(preset) {
+  const players = matchState.players || [];
+  if (preset === "all") {
+    myAssignedPlayerIds = players.map(p => p.id);
+  } else if (preset === "forwards") {
+    myAssignedPlayerIds = players.filter(p => (p.number || 0) >= 1 && (p.number || 0) <= 8).map(p => p.id);
+    if (myAssignedPlayerIds.length === 0) {
+      myAssignedPlayerIds = players.slice(0, 8).map(p => p.id);
+    }
+  } else if (preset === "backs") {
+    myAssignedPlayerIds = players.filter(p => (p.number || 0) >= 9).map(p => p.id);
+    if (myAssignedPlayerIds.length === 0) {
+      myAssignedPlayerIds = players.slice(8).map(p => p.id);
+    }
+  } else if (preset === "clear") {
+    myAssignedPlayerIds = [];
   }
+
+  if (!myAssignedPlayerIds.includes(activePlayerId)) {
+    activePlayerId = myAssignedPlayerIds[0] || (players[0] ? players[0].id : "");
+  }
+
+  try {
+    localStorage.setItem("uag_my_players", JSON.stringify(myAssignedPlayerIds));
+  } catch (e) {}
+
+  renderGroupModalList();
+  renderAssignedPlayersSection();
+  renderActionsGrid();
+  if (navigator.vibrate) { try { navigator.vibrate(25); } catch (e) {} }
 }
 
-function openPlayerDropdown() {
-  const menu = document.getElementById("player-dropdown-menu");
-  const trigger = document.getElementById("btn-player-dropdown-trigger");
-  if (!menu || !trigger) return;
-
-  menu.style.display = "flex";
-  trigger.classList.add("open");
-  trigger.setAttribute("aria-expanded", "true");
-  renderDropdownPlayersList();
+function validateGroupSelection() {
+  try {
+    localStorage.setItem("uag_my_players", JSON.stringify(myAssignedPlayerIds));
+  } catch (e) {}
+  closeGroupModal();
+  renderAssignedPlayersSection();
+  renderActionsGrid();
+  if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
 }
 
-function closePlayerDropdown() {
-  const menu = document.getElementById("player-dropdown-menu");
-  const trigger = document.getElementById("btn-player-dropdown-trigger");
-  if (!menu || !trigger) return;
-
-  menu.style.display = "none";
-  trigger.classList.remove("open");
-  trigger.setAttribute("aria-expanded", "false");
-}
+// Compatibilité
+function renderPlayerDropdown() { renderAssignedPlayersSection(); }
+function openPlayerDropdown() { openGroupModal(); }
+function closePlayerDropdown() { closeGroupModal(); }
+function togglePlayerDropdown() { openGroupModal(); }
+function togglePlayerSelection(id) { toggleAssignedPlayer(id); }
+function selectOnlyPlayer(id) { selectOnlyAssignedPlayer(id); }
+function selectPlayerPreset(preset) { setAssignedPreset(preset); }
+function clearPlayerSelection() { setAssignedPreset("clear"); }
 
 function renderPlayerChips() {}
 function renderQuickNumberPad() {}
@@ -621,28 +709,8 @@ function renderActionsGrid() {
   if (!grid) return;
 
   const players = matchState.players || [];
-  const selectedPlayers = players.filter(p => selectedPlayerIds.includes(p.id));
-
-  let stats = {};
-  if (selectedPlayers.length === 1) {
-    stats = getPlayerStats(selectedPlayers[0], activeHalf);
-  } else if (selectedPlayers.length > 1) {
-    ACTIONS.forEach(a => { stats[a.key] = 0; });
-    stats.yellow_cards = 0;
-    stats.white_cards = 0;
-    stats.red_cards = 0;
-    stats.minutes_played = 0;
-    selectedPlayers.forEach(p => {
-      const s = getPlayerStats(p, activeHalf);
-      ACTIONS.forEach(a => { stats[a.key] += (s[a.key] || 0); });
-      stats.yellow_cards += (s.yellow_cards || 0);
-      stats.white_cards += (s.white_cards || 0);
-      stats.red_cards += (s.red_cards || 0);
-      stats.minutes_played = Math.max(stats.minutes_played, s.minutes_played || 0);
-    });
-  } else {
-    stats = {};
-  }
+  const activePlayer = players.find(p => p.id === activePlayerId) || (players.length > 0 ? players[0] : null);
+  const stats = activePlayer ? getPlayerStats(activePlayer, activeHalf) : {};
   const isTotal = activeHalf === "total";
 
   grid.innerHTML = "";
@@ -1184,23 +1252,19 @@ function closeShareModal() {
    EVENEMENTS UI
    ========================================================================== */
 function initUIEvents() {
-  // Dropdown Joueuses
-  document.getElementById("btn-player-dropdown-trigger")?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    togglePlayerDropdown();
-  });
-  document.getElementById("btn-dropdown-close-x")?.addEventListener("click", closePlayerDropdown);
-  document.getElementById("btn-dropdown-validate")?.addEventListener("click", closePlayerDropdown);
-  document.getElementById("btn-filter-forwards")?.addEventListener("click", () => selectPlayerPreset("forwards"));
-  document.getElementById("btn-filter-backs")?.addEventListener("click", () => selectPlayerPreset("backs"));
-  document.getElementById("btn-filter-all")?.addEventListener("click", () => selectPlayerPreset("all"));
-  document.getElementById("btn-filter-clear")?.addEventListener("click", () => selectPlayerPreset("clear"));
+  // Gestion du Groupe de Joueuses Suivies (Modale & Bandeau)
+  document.getElementById("btn-open-group-selector")?.addEventListener("click", openGroupModal);
+  document.getElementById("btn-group-close-x")?.addEventListener("click", closeGroupModal);
+  document.getElementById("btn-group-validate")?.addEventListener("click", validateGroupSelection);
+  document.getElementById("btn-filter-forwards")?.addEventListener("click", () => setAssignedPreset("forwards"));
+  document.getElementById("btn-filter-backs")?.addEventListener("click", () => setAssignedPreset("backs"));
+  document.getElementById("btn-filter-all")?.addEventListener("click", () => setAssignedPreset("all"));
+  document.getElementById("btn-filter-clear")?.addEventListener("click", () => setAssignedPreset("clear"));
 
-  // Fermer le menu déroulant si clic en dehors
-  document.addEventListener("click", (e) => {
-    const container = document.getElementById("player-dropdown-container");
-    if (container && !container.contains(e.target)) {
-      closePlayerDropdown();
+  // Fermer la modale si clic sur le fond sombre
+  document.getElementById("group-modal-backdrop")?.addEventListener("click", (e) => {
+    if (e.target.id === "group-modal-backdrop") {
+      closeGroupModal();
     }
   });
 
@@ -1672,3 +1736,10 @@ window.submitCardAction = submitCardAction;
 window.deletePlayer = deletePlayer;
 window.fetchStandings = fetchStandings;
 window.renderStandings = renderStandings;
+window.openGroupModal = openGroupModal;
+window.closeGroupModal = closeGroupModal;
+window.setActivePlayer = setActivePlayer;
+window.toggleAssignedPlayer = toggleAssignedPlayer;
+window.selectOnlyAssignedPlayer = selectOnlyAssignedPlayer;
+window.setAssignedPreset = setAssignedPreset;
+window.validateGroupSelection = validateGroupSelection;

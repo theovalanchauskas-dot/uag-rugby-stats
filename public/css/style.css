@@ -1767,281 +1767,410 @@ body {
 }
 
 /* ==========================================================================
-   MENU DÉROULANT JOUEUSES (ÉPURÉ, COMPACT & MULTI-SÉLECTION)
+   BANDEAU DES JOUEUSES ASSIGNÉES (PARTAGE ENTRE BLESSÉES SUR LA TOUCHE)
    ========================================================================== */
-.player-dropdown-container {
-  position: relative;
+.assigned-section-wrapper {
   width: 100%;
   max-width: 580px;
   margin: 0 auto 12px auto;
-  z-index: 50;
+  background: linear-gradient(180deg, #161926 0%, #11131E 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
-.player-dropdown-trigger {
-  width: 100%;
-  background: linear-gradient(180deg, #181B26 0%, #12141D 100%);
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  padding: 8px 14px;
+.assigned-header-bar {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
-  color: #fff;
-  text-align: left;
-}
-
-.player-dropdown-trigger:hover,
-.player-dropdown-trigger.open {
-  border-color: var(--uag-gold);
-  background: #1C202E;
-}
-
-.dropdown-trigger-main {
-  display: flex;
   align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.dropdown-trigger-jersey {
-  flex-shrink: 0;
-}
-
-.dropdown-trigger-jersey.group-jersey {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(229, 169, 60, 0.15);
-  border: 1px solid var(--uag-gold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-}
-
-.dropdown-trigger-info {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.dropdown-trigger-name {
-  font-family: var(--font-body);
-  font-weight: 800;
-  font-size: 0.95rem;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.dropdown-trigger-pos {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.dropdown-trigger-stats {
-  font-size: 0.72rem;
-  color: #A0AEC0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.dropdown-trigger-badge {
+.assigned-title-group {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-left: 8px;
-  flex-shrink: 0;
 }
 
-.dropdown-arrow-icon {
-  font-size: 0.85rem;
-  color: var(--uag-gold);
-  transition: transform 0.2s ease;
+.assigned-icon {
+  font-size: 1rem;
 }
 
-.player-dropdown-trigger.open .dropdown-arrow-icon {
-  transform: rotate(180deg);
-}
-
-/* MENU DÉROULANT OUVERT */
-.player-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  background: #13151F;
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
-  border-radius: 14px;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.4);
-  padding: 12px;
-  z-index: 100;
-  animation: dropSlideDown 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  max-height: 440px;
-  display: flex;
-  flex-direction: column;
-}
-
-@keyframes dropSlideDown {
-  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.dropdown-menu-header {
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  margin-bottom: 8px;
-}
-
-.dropdown-menu-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.dropdown-menu-title {
-  font-size: 0.85rem;
+.assigned-title-text {
+  font-family: var(--font-body);
   font-weight: 800;
+  font-size: 0.8rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   color: #E2E8F0;
 }
 
-.btn-dropdown-close-x {
+.assigned-count-pill {
+  background: rgba(229, 169, 60, 0.2);
+  color: var(--uag-gold);
+  border: 1px solid rgba(229, 169, 60, 0.35);
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.btn-manage-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  color: #F8FAFC;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-manage-group:hover {
+  background: rgba(229, 169, 60, 0.15);
+  border-color: var(--uag-gold);
+  color: var(--uag-gold);
+}
+
+.btn-manage-group:active {
+  transform: scale(0.96);
+}
+
+/* BANDEAU HORIZONTAL DE DÉFILEMENT */
+.assigned-strip-container {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(229, 169, 60, 0.3) transparent;
+  padding: 4px 2px 8px 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.assigned-strip-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.assigned-strip-container::-webkit-scrollbar-thumb {
+  background: rgba(229, 169, 60, 0.3);
+  border-radius: 4px;
+}
+
+.assigned-players-strip {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 48px;
+}
+
+/* BADGE JOUEUSE DANS LE BANDEAU */
+.assigned-player-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #181C2B;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.assigned-player-badge:hover {
+  background: #202538;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.assigned-player-badge.active {
+  background: linear-gradient(135deg, rgba(229, 169, 60, 0.25) 0%, rgba(200, 16, 46, 0.25) 100%), #1F2436;
+  border-color: var(--uag-gold);
+  box-shadow: 0 0 14px rgba(229, 169, 60, 0.5), inset 0 0 6px rgba(229, 169, 60, 0.15);
+  transform: translateY(-1px);
+}
+
+.assigned-player-badge.active .assigned-badge-name {
+  color: #fff;
+  font-weight: 900;
+}
+
+.assigned-badge-name {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #CBD5E1;
+  white-space: nowrap;
+}
+
+.assigned-badge-stat {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--uag-green);
+  background: rgba(16, 185, 129, 0.15);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.assigned-badge-active-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--uag-gold);
+  box-shadow: 0 0 6px var(--uag-gold);
+}
+
+/* BANDEAU VIDE (CALL TO ACTION) */
+.assigned-empty-prompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(229, 169, 60, 0.08);
+  border: 1px dashed rgba(229, 169, 60, 0.35);
+  border-radius: 10px;
+  color: var(--uag-gold);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  justify-content: center;
+}
+
+.assigned-empty-prompt:hover {
+  background: rgba(229, 169, 60, 0.15);
+}
+
+/* BANDEAU RÉSUMÉ DE LA JOUEUSE ACTIVE */
+.active-player-banner {
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.active-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.active-banner-name {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.active-banner-pos {
+  font-size: 0.74rem;
+  color: var(--uag-gold);
+  font-weight: 600;
+  background: rgba(229, 169, 60, 0.12);
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.active-banner-stats {
+  font-size: 0.74rem;
+  color: #CBD5E1;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* MODALE FLOTTANTE DE CHOIX DU GROUPE */
+.group-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.group-modal-card {
+  background: #131622;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(229, 169, 60, 0.15);
+  animation: dropSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 14px;
+}
+
+.group-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.group-modal-title {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.group-modal-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.btn-modal-close {
   background: rgba(255, 255, 255, 0.08);
   border: none;
   color: var(--text-muted);
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   transition: all 0.1s;
+  flex-shrink: 0;
 }
 
-.btn-dropdown-close-x:hover {
+.btn-modal-close:hover {
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
 }
 
-.dropdown-filter-chips {
+.group-modal-presets {
   display: flex;
   gap: 6px;
+  margin: 10px 0 8px 0;
   overflow-x: auto;
   scrollbar-width: none;
 }
 
-.dropdown-filter-chips::-webkit-scrollbar {
+.group-modal-presets::-webkit-scrollbar {
   display: none;
 }
 
-.drop-filter-btn {
+.preset-chip-btn {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #CBD5E1;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.72rem;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.74rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.12s;
 }
 
-.drop-filter-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+.preset-chip-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
   color: #fff;
 }
 
-.drop-filter-btn.drop-filter-clear {
+.preset-chip-btn.preset-clear {
   color: #F87171;
   border-color: rgba(248, 113, 113, 0.3);
 }
 
-.dropdown-players-list {
+.group-modal-players-list {
   overflow-y: auto;
   flex: 1;
-  max-height: 280px;
+  max-height: 320px;
   padding-right: 4px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
+  margin: 4px 0 8px 0;
 }
 
-.dropdown-player-row {
+.group-player-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.02);
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.1s;
   user-select: none;
 }
 
-.dropdown-player-row:hover {
-  background: rgba(255, 255, 255, 0.06);
+.group-player-row:hover {
+  background: rgba(255, 255, 255, 0.07);
 }
 
-.dropdown-player-row.selected {
+.group-player-row.selected {
   background: rgba(229, 169, 60, 0.12);
-  border-color: rgba(229, 169, 60, 0.35);
+  border-color: rgba(229, 169, 60, 0.4);
 }
 
-.dropdown-player-checkbox {
-  width: 18px;
-  height: 18px;
+.group-player-checkbox {
+  width: 20px;
+  height: 20px;
   cursor: pointer;
   accent-color: var(--uag-gold);
 }
 
-.dropdown-player-meta {
+.group-player-meta {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.dropdown-player-name {
+.group-player-name {
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: #fff;
 }
 
-.dropdown-player-pos {
-  font-size: 0.7rem;
+.group-player-pos {
+  font-size: 0.72rem;
   color: var(--text-muted);
 }
 
-.dropdown-player-quickstat {
-  font-size: 0.72rem;
+.group-player-quickstat {
+  font-size: 0.74rem;
   font-weight: 700;
   color: var(--uag-green);
   background: rgba(16, 185, 129, 0.12);
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
 }
 
 .btn-select-only {
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   color: #CBD5E1;
-  padding: 3px 8px;
+  padding: 4px 9px;
   border-radius: 6px;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.12s;
@@ -2053,35 +2182,40 @@ body {
   color: #111;
 }
 
-.dropdown-menu-footer {
+.group-modal-footer {
   margin-top: 8px;
-  padding-top: 8px;
+  padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.dropdown-selected-summary {
-  font-size: 0.75rem;
+.group-modal-count-text {
+  font-size: 0.76rem;
   color: var(--text-muted);
   font-weight: 600;
 }
 
-.btn-dropdown-validate {
+.btn-group-validate {
   background: linear-gradient(180deg, #D90429 0%, #B90322 100%);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 5px 16px;
+  padding: 7px 18px;
   border-radius: 8px;
   font-weight: 800;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(217, 4, 41, 0.4);
+  box-shadow: 0 2px 8px rgba(217, 4, 41, 0.4);
+  transition: all 0.15s ease;
 }
 
-.btn-dropdown-validate:active {
-  transform: scale(0.95);
+.btn-group-validate:hover {
+  background: linear-gradient(180deg, #EF233C 0%, #D90429 100%);
+}
+
+.btn-group-validate:active {
+  transform: scale(0.96);
 }
 
 /* GRILLE DU MODE TOUCHE (GROS BOUTONS ERGONOMIQUES) */

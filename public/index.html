@@ -91,41 +91,60 @@
         </button>
       </div>
 
-      <!-- SÉLECTEUR DE JOUEUSES EN MENU DÉROULANT (ÉPURÉ & MULTI-SÉLECTION) -->
-      <div class="player-dropdown-container" id="player-dropdown-container">
-        <button class="player-dropdown-trigger" id="btn-player-dropdown-trigger" type="button" aria-expanded="false" title="Cliquer pour changer de joueuse ou sélectionner plusieurs joueuses">
-          <div class="dropdown-trigger-main" id="dropdown-selected-display">
-            <!-- Rempli dynamiquement : Maillot #1 + Léa (Pilier Gauche) OU "2 joueuses sélectionnées" -->
+      <!-- SECTION BANDEAU DES JOUEUSES ASSIGNÉES (PARTAGE ENTRE BLESSÉES) -->
+      <div class="assigned-section-wrapper" id="assigned-section-wrapper">
+        <div class="assigned-header-bar">
+          <div class="assigned-title-group">
+            <span class="assigned-icon">👥</span>
+            <span class="assigned-title-text">Mes Joueuses Suivies</span>
+            <span class="assigned-count-pill" id="assigned-count-pill">0</span>
           </div>
-          <div class="dropdown-trigger-badge">
-            <span class="dropdown-arrow-icon" id="dropdown-arrow-icon">▾</span>
-          </div>
-        </button>
+          <button class="btn-manage-group" id="btn-open-group-selector" type="button" title="Choisir les joueuses que je suis sur ce match">
+            <span class="btn-manage-icon">⚙️</span>
+            <span>Choisir</span>
+          </button>
+        </div>
 
-        <!-- MENU DÉROULANT FLOTTANT DE SÉLECTION -->
-        <div class="player-dropdown-menu" id="player-dropdown-menu" style="display:none;">
-          <div class="dropdown-menu-header">
-            <div class="dropdown-menu-title-row">
-              <span class="dropdown-menu-title">Sélectionner les joueuses</span>
-              <button type="button" class="btn-dropdown-close-x" id="btn-dropdown-close-x">✕</button>
+        <!-- LE BANDEAU DES JOUEUSES ATTRIBUÉES (DÉFILEMENT HORIZONTAL FLUIDE) -->
+        <div class="assigned-strip-container" id="assigned-strip-container">
+          <div class="assigned-players-strip" id="assigned-players-strip">
+            <!-- Badges générés dynamiquement : [#1 Léa (ACTIF)] [#2 Nono] [#3 Margaux]... -->
+          </div>
+        </div>
+
+        <!-- BANDEAU RÉSUMÉ DE LA JOUEUSE ACTIVE -->
+        <div class="active-player-banner" id="active-player-banner">
+          <!-- Rempli dynamiquement avec maillot, nom, poste et stats clés -->
+        </div>
+
+        <!-- MODALE FLOTTANTE DE CHOIX DU GROUPE -->
+        <div class="group-modal-backdrop" id="group-modal-backdrop" style="display:none;">
+          <div class="group-modal-card">
+            <div class="group-modal-head">
+              <div>
+                <div class="group-modal-title">Choisir vos joueuses à suivre</div>
+                <div class="group-modal-subtitle">Cochez vos joueuses pour les avoir en accès direct sur votre bandeau</div>
+              </div>
+              <button type="button" class="btn-modal-close" id="btn-group-close-x">✕</button>
             </div>
-            <div class="dropdown-filter-chips">
-              <button type="button" class="drop-filter-btn" id="btn-filter-forwards">Avants (1-8)</button>
-              <button type="button" class="drop-filter-btn" id="btn-filter-backs">3/4 (9-15)</button>
-              <button type="button" class="drop-filter-btn" id="btn-filter-all">Toutes</button>
-              <button type="button" class="drop-filter-btn drop-filter-clear" id="btn-filter-clear">Vider</button>
+
+            <div class="group-modal-presets">
+              <button type="button" class="preset-chip-btn" id="btn-filter-forwards">Avants (1-8)</button>
+              <button type="button" class="preset-chip-btn" id="btn-filter-backs">3/4 (9-15)</button>
+              <button type="button" class="preset-chip-btn" id="btn-filter-all">Tout le 15</button>
+              <button type="button" class="preset-chip-btn preset-clear" id="btn-filter-clear">Vider</button>
             </div>
-          </div>
 
-          <div class="dropdown-players-list" id="dropdown-players-list">
-            <!-- Liste générée dynamiquement avec Maillots UAG rayés, noms, postes et checkboxes -->
-          </div>
+            <div class="group-modal-players-list" id="dropdown-players-list">
+              <!-- Liste complète avec cases à cocher, maillots UAG et boutons 'Seule' -->
+            </div>
 
-          <div class="dropdown-menu-footer">
-            <span class="dropdown-selected-summary" id="dropdown-footer-summary">1 joueuse sélectionnée</span>
-            <button type="button" class="btn-dropdown-validate" id="btn-dropdown-validate">
-              OK
-            </button>
+            <div class="group-modal-footer">
+              <span class="group-modal-count-text" id="dropdown-footer-summary">0 joueuse sélectionnée</span>
+              <button type="button" class="btn-group-validate" id="btn-group-validate">
+                Valider mon bandeau
+              </button>
+            </div>
           </div>
         </div>
       </div>

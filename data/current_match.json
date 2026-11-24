@@ -25,7 +25,7 @@
       "active": true,
       "stats": {
         "first": {
-          "tackles_made": 3,
+          "tackles_made": 4,
           "tackles_missed": 1,
           "turnovers_won": 0,
           "offensive_actions": 0,
@@ -67,7 +67,7 @@
       "active": true,
       "stats": {
         "first": {
-          "tackles_made": 1,
+          "tackles_made": 3,
           "tackles_missed": 0,
           "turnovers_won": 1,
           "offensive_actions": 0,
@@ -109,7 +109,7 @@
       "active": true,
       "stats": {
         "first": {
-          "tackles_made": 0,
+          "tackles_made": 1,
           "tackles_missed": 0,
           "turnovers_won": 0,
           "offensive_actions": 0,
@@ -648,6 +648,58 @@
     }
   ],
   "history": [
+    {
+      "id": "act-1795530451207-p2",
+      "time": "15:27:31",
+      "minute": 40,
+      "half": "first",
+      "playerId": "p2",
+      "playerName": "Nono",
+      "category": "tackles_made",
+      "label": "Plaquage réussi",
+      "delta": 1,
+      "newValue": 3,
+      "user": "Staff UAG"
+    },
+    {
+      "id": "act-1795529815198-p3",
+      "time": "15:16:55",
+      "minute": 40,
+      "half": "first",
+      "playerId": "p3",
+      "playerName": "Manon",
+      "category": "tackles_made",
+      "label": "Plaquage réussi",
+      "delta": 1,
+      "newValue": 1,
+      "user": "Staff UAG"
+    },
+    {
+      "id": "act-1795529815198-p1",
+      "time": "15:16:55",
+      "minute": 40,
+      "half": "first",
+      "playerId": "p1",
+      "playerName": "Léa",
+      "category": "tackles_made",
+      "label": "Plaquage réussi",
+      "delta": 1,
+      "newValue": 4,
+      "user": "Staff UAG"
+    },
+    {
+      "id": "act-1795529815198-p2",
+      "time": "15:16:55",
+      "minute": 40,
+      "half": "first",
+      "playerId": "p2",
+      "playerName": "Nono",
+      "category": "tackles_made",
+      "label": "Plaquage réussi",
+      "delta": 1,
+      "newValue": 2,
+      "user": "Staff UAG"
+    },
     {
       "id": "act-1795528089622",
       "time": "14:48:09",
