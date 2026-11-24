@@ -290,10 +290,119 @@
       </div>
     </div>
 
+    <!-- ==================================================================
+         ONGLET 5 : CLASSEMENT FÉDÉRALE 1 FÉMININE (FFR)
+         ================================================================== -->
+    <div class="tab-pane" id="tab-standings">
+      <!-- EN-TÊTE DU CLASSEMENT -->
+      <div class="standings-header-card">
+        <div class="standings-header-top">
+          <div>
+            <div class="standings-badge-ffr">🏉 FFR • Fédérale 1 Féminine</div>
+            <h3 class="standings-title">Poule 3 — Saison 2026/2027</h3>
+            <p class="standings-sub">Classement officiel Fédération Française de Rugby</p>
+          </div>
+          <a href="https://monclubhouse.ffr.fr/nationales/federale-1-feminine/qualification-50138/73056/classements" target="_blank" rel="noopener noreferrer" class="btn-ffr-link">
+            <span>FFR Mon Club House</span> ↗
+          </a>
+        </div>
+        <div class="standings-sync-bar">
+          <div class="sync-status">
+            <span class="sync-dot"></span>
+            <span>Mise à jour automatique chaque week-end</span>
+          </div>
+          <div class="sync-date-tag">Dernière MAJ : <b id="standings-last-updated">24/11/2026</b></div>
+        </div>
+      </div>
+
+      <!-- CARTE FOCUS UAG GAILLAC -->
+      <div class="uag-focus-card" id="uag-standing-card">
+        <div class="uag-focus-left">
+          <div class="uag-focus-rank-badge">
+            <span class="uag-focus-rank" id="uag-rank-num">4</span>
+            <span class="uag-focus-suffix">e</span>
+          </div>
+          <div class="uag-focus-info">
+            <div class="uag-focus-club">Union Athlétique Gaillacoise Rugby</div>
+            <div class="uag-focus-qualification">
+              <span class="badge-qualif">🏉 Zone de qualification (Top 4)</span>
+            </div>
+          </div>
+        </div>
+        <div class="uag-focus-stats">
+          <div class="focus-stat-item">
+            <span class="focus-stat-val" id="uag-stat-pts">19</span>
+            <span class="focus-stat-lbl">PTS</span>
+          </div>
+          <div class="focus-stat-item">
+            <span class="focus-stat-val" id="uag-stat-j">6</span>
+            <span class="focus-stat-lbl">JOUÉS</span>
+          </div>
+          <div class="focus-stat-item">
+            <span class="focus-stat-val" id="uag-stat-diff">+36</span>
+            <span class="focus-stat-lbl">DIFF</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLEAU DU CLASSEMENT DE LA POULE 3 -->
+      <div class="standings-table-card">
+        <div class="standings-table-header">
+          <h4>Classement Général</h4>
+          <span class="standings-legende-top4"><span class="dot-top4"></span> 1 à 4 : Qualifiés phases finales</span>
+        </div>
+        <div class="table-container-sleek">
+          <table class="sleek-table standings-table">
+            <thead>
+              <tr>
+                <th style="width:36px; text-align:center;">#</th>
+                <th>Club</th>
+                <th style="text-align:center; font-weight:800; color:#fff;">PTS</th>
+                <th style="text-align:center;">J</th>
+                <th style="text-align:center;">G</th>
+                <th style="text-align:center;">N</th>
+                <th style="text-align:center;">P</th>
+                <th style="text-align:center;">BO</th>
+                <th style="text-align:center;">BD</th>
+                <th style="text-align:center;">+/-</th>
+                <th style="text-align:center;">5 Derniers</th>
+              </tr>
+            </thead>
+            <tbody id="standings-table-body">
+              <!-- Rendu dynamique JS -->
+            </tbody>
+          </table>
+        </div>
+        <div class="standings-legend-footer">
+          <span><b>PTS</b> : Points • <b>J</b> : Joués • <b>G/N/P</b> : Gagnés / Nuls / Perdus • <b>BO/BD</b> : Bonus Offensif / Défensif • <b>+/-</b> : Différence</span>
+        </div>
+      </div>
+
+      <!-- GESTION / ACTUALISATION DES POINTS DU WEEK-END -->
+      <div class="standings-admin-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h5 style="margin:0; font-size:0.85rem; color:#fff;">Mise à jour des résultats du week-end</h5>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Saisir les scores ou modifier les points après une journée de championnat</span>
+          </div>
+          <button class="btn-secondary-sleek" id="btn-toggle-edit-standings" style="font-size:0.78rem;">
+            ✏️ Éditer les scores
+          </button>
+        </div>
+        <div id="standings-edit-panel" style="display:none; margin-top:14px;">
+          <div id="standings-edit-rows" style="display:flex; flex-direction:column; gap:8px;"></div>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="btn-primary-sleek" id="btn-save-standings" style="flex:1;">💾 Enregistrer le classement</button>
+            <button class="btn-secondary-sleek" id="btn-cancel-standings">Annuler</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- ====================================================================
-       BARRE DE NAVIGATION DU BAS (4 ONGLETS ÉPURÉS)
+       BARRE DE NAVIGATION DU BAS (5 ONGLETS ÉPURÉS)
        ==================================================================== -->
   <nav class="app-bottom-nav">
     <button class="nav-tab-item active" data-tab="tracker">
@@ -308,6 +417,10 @@
       <span class="nav-icon">⚡</span>
       <span class="nav-text">Direct</span>
       <span id="feed-count-badge" class="mini-counter">0</span>
+    </button>
+    <button class="nav-tab-item" data-tab="standings">
+      <span class="nav-icon">🏆</span>
+      <span class="nav-text">Classement</span>
     </button>
     <button class="nav-tab-item" data-tab="settings">
       <span class="nav-icon">⚙️</span>

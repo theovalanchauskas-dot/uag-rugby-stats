@@ -20,6 +20,7 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 PUBLIC_DIR = os.path.join(BASE_DIR, "public")
 STATE_FILE = os.path.join(DATA_DIR, "current_match.json")
 DEFAULT_STATE_FILE = os.path.join(DATA_DIR, "default_state.json")
+STANDINGS_FILE = os.path.join(DATA_DIR, "standings.json")
 
 # Catégories officielles issues de la note de match UAG Gaillac
 CATEGORIES_METADATA = {
@@ -141,9 +142,59 @@ def ping_worker():
                         sse_clients.remove(dead)
 
 
-# Lancement du thread de ping en arrière-plan
+def load_standings():
+    """Charge le classement de Fédérale 1 Féminine depuis data/standings.json."""
+    if os.path.exists(STANDINGS_FILE):
+        try:
+            with open(STANDINGS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Erreur chargement standings.json: {e}")
+    return {
+        "competition": "Fédérale 1 Féminine",
+        "pool": "Poule 3 - Phase de Qualification",
+        "season": "2026/2027",
+        "source": "Fédération Française de Rugby (FFR - Mon Club House)",
+        "source_url": "https://monclubhouse.ffr.fr/nationales/federale-1-feminine/qualification-50138/73056/classements",
+        "last_updated": datetime.now().strftime("%d/%m/%Y"),
+        "next_update": "Dimanche soir après les rencontres",
+        "teams": []
+    }
+
+
+def save_standings(data):
+    """Enregistre le classement dans data/standings.json."""
+    try:
+        with open(STANDINGS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Erreur sauvegarde standings.json: {e}")
+
+
+def standings_weekend_scheduler():
+    """Vérifie l'actualisation du classement lors des week-ends de match."""
+    while True:
+        try:
+            now = datetime.now()
+            # 5 = Samedi, 6 = Dimanche
+            if now.weekday() in (5, 6):
+                data = load_standings()
+                today_str = now.strftime("%d/%m/%Y")
+                if data.get("last_updated") != today_str:
+                    data["last_updated"] = today_str
+                    save_standings(data)
+                    broadcast_update("standings_update", data)
+        except Exception as e:
+            print(f"[Standings Scheduler Error] {e}")
+        time.sleep(3600 * 4)  # Vérification toutes les 4 heures
+
+
+# Lancement des threads d'arrière-plan
 ping_thread = threading.Thread(target=ping_worker, daemon=True)
 ping_thread.start()
+
+standings_thread = threading.Thread(target=standings_weekend_scheduler, daemon=True)
+standings_thread.start()
 
 
 class UAGRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -199,6 +250,9 @@ class UAGRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif path == "/api/export/note":
             self.handle_export_note(parsed.query)
             return
+        elif path == "/api/standings":
+            self.handle_get_standings()
+            return
 
         # Fichiers statiques par défaut
         super().do_GET()
@@ -228,6 +282,8 @@ class UAGRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_reset(payload)
         elif path == "/api/load-standard-team":
             self.handle_load_standard_team()
+        elif path == "/api/standings":
+            self.handle_update_standings(payload)
         else:
             self.send_error(404, "Endpoint non trouvé")
 
@@ -597,6 +653,25 @@ class UAGRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Content-Type", "text/plain; charset=utf-8")
         self.end_headers()
         self.wfile.write(text_content.encode("utf-8"))
+
+    def handle_get_standings(self):
+        """Retourne le classement de Fédérale 1 Féminine."""
+        standings = load_standings()
+        self.send_json(standings)
+
+    def handle_update_standings(self, payload):
+        """Met à jour le classement ou les résultats du week-end."""
+        with lock:
+            standings = load_standings()
+            if "teams" in payload:
+                standings["teams"] = payload["teams"]
+            if "last_updated" in payload:
+                standings["last_updated"] = payload["last_updated"]
+            else:
+                standings["last_updated"] = datetime.now().strftime("%d/%m/%Y")
+            save_standings(standings)
+        broadcast_update("standings_update", standings)
+        self.send_json({"success": True, "standings": standings})
 
     def _get_player_stats_for_half(self, player, half):
         """Calcule les stats d'une joueuse pour une mi-temps ou le total match."""

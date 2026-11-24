@@ -41,6 +41,7 @@ let eventSource = null;
 let timerInterval = null;
 let serverNetworkInfo = null;
 let toastTimeout = null;
+let standingsData = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   initTabs();
@@ -48,7 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
   initPhaseFilterButtons();
   initSSE();
   initUIEvents();
+  initStandingsEvents();
   fetchNetworkInfo();
+  fetchStandings();
 });
 
 /* ==========================================================================
@@ -117,6 +120,13 @@ function initSSE() {
       } catch (err) {}
     });
 
+    eventSource.addEventListener("standings_update", (e) => {
+      try {
+        standingsData = JSON.parse(e.data);
+        renderStandings();
+      } catch (err) {}
+    });
+
     eventSource.onerror = () => {
       if (liveDot) liveDot.style.background = "var(--uag-danger)";
       if (liveText) liveText.textContent = "Reconnexion...";
@@ -173,6 +183,8 @@ function switchTab(tabId) {
     renderTeamKPIs();
   } else if (tabId === "feed") {
     renderLiveFeed();
+  } else if (tabId === "standings") {
+    renderStandings();
   }
 }
 
@@ -1018,6 +1030,178 @@ async function deletePlayer(playerId, playerName) {
   }
 }
 
+/* ==========================================================================
+   CLASSEMENT FFR FÉDÉRALE 1 FÉMININE
+   ========================================================================== */
+async function fetchStandings() {
+  try {
+    const res = await fetch("/api/standings");
+    if (res.ok) {
+      standingsData = await res.json();
+      renderStandings();
+    }
+  } catch (e) {
+    console.error("Erreur chargement classement:", e);
+  }
+}
+
+function renderStandings() {
+  if (!standingsData) return;
+  const teams = standingsData.teams || [];
+
+  // Date de dernière mise à jour
+  const dateEl = document.getElementById("standings-last-updated");
+  if (dateEl && standingsData.last_updated) {
+    dateEl.textContent = standingsData.last_updated;
+  }
+
+  // Focus UAG Gaillac
+  const uag = teams.find(t => t.is_uag) || teams.find(t => (t.name || "").includes("Gaillac")) || null;
+  if (uag) {
+    const rankEl = document.getElementById("uag-rank-num");
+    const ptsEl = document.getElementById("uag-stat-pts");
+    const jEl = document.getElementById("uag-stat-j");
+    const diffEl = document.getElementById("uag-stat-diff");
+    if (rankEl) rankEl.textContent = uag.rank;
+    if (ptsEl) ptsEl.textContent = uag.points;
+    if (jEl) jEl.textContent = uag.played;
+    if (diffEl) diffEl.textContent = (uag.diff > 0 ? "+" : "") + uag.diff;
+  }
+
+  // Tableau complet
+  const tbody = document.getElementById("standings-table-body");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  teams.forEach(t => {
+    const tr = document.createElement("tr");
+    if (t.is_uag) tr.className = "row-uag";
+
+    const isTop4 = t.rank <= 4;
+    const rankBadgeClass = isTop4 ? "rank-top4" : "rank-other";
+
+    // Form pills
+    const formHtml = (t.form || []).map(f => {
+      const cls = f === "V" ? "form-v" : (f === "N" ? "form-n" : "form-d");
+      return `<span class="form-pill ${cls}">${f}</span>`;
+    }).join("");
+
+    tr.innerHTML = `
+      <td style="text-align:center;">
+        <span class="rank-pill ${rankBadgeClass}">${t.rank}</span>
+      </td>
+      <td>
+        <div class="club-name-cell">
+          <span>${t.name}</span>
+          ${t.is_uag ? '<span class="uag-tag-mini">UAG</span>' : ''}
+        </div>
+      </td>
+      <td style="text-align:center; font-weight:800; color:#fff; font-size:0.95rem;">${t.points}</td>
+      <td style="text-align:center;">${t.played}</td>
+      <td style="text-align:center; color:var(--uag-green); font-weight:600;">${t.won}</td>
+      <td style="text-align:center; color:var(--uag-gold);">${t.drawn}</td>
+      <td style="text-align:center; color:var(--uag-danger);">${t.lost}</td>
+      <td style="text-align:center;">${t.bonus_off || 0}</td>
+      <td style="text-align:center;">${t.bonus_def || 0}</td>
+      <td style="text-align:center; font-weight:600; color:${t.diff > 0 ? "var(--uag-green)" : (t.diff < 0 ? "var(--uag-danger)" : "#fff")};">
+        ${t.diff > 0 ? "+" + t.diff : t.diff}
+      </td>
+      <td style="text-align:center;">
+        <div class="form-pills">${formHtml}</div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function initStandingsEvents() {
+  document.getElementById("btn-refresh-standings")?.addEventListener("click", async () => {
+    await fetchStandings();
+    alert("Classement FFR actualisé !");
+  });
+
+  const btnToggle = document.getElementById("btn-toggle-edit-standings");
+  const editPanel = document.getElementById("standings-edit-panel");
+  const editRows = document.getElementById("standings-edit-rows");
+
+  btnToggle?.addEventListener("click", () => {
+    if (!standingsData || !editPanel || !editRows) return;
+    const isVisible = editPanel.style.display === "block";
+    if (isVisible) {
+      editPanel.style.display = "none";
+      return;
+    }
+    editPanel.style.display = "block";
+    editRows.innerHTML = `
+      <div style="display:grid; grid-template-columns:30px 1.5fr repeat(3, 1fr); gap:6px; font-size:0.7rem; color:var(--text-muted); font-weight:700; padding:0 10px;">
+        <span>#</span>
+        <span>Club</span>
+        <span style="text-align:center;">PTS</span>
+        <span style="text-align:center;">J</span>
+        <span style="text-align:center;">+/-</span>
+      </div>
+    `;
+    (standingsData.teams || []).forEach((t, i) => {
+      const row = document.createElement("div");
+      row.className = "edit-row-item";
+      row.innerHTML = `
+        <span style="font-weight:800; color:var(--text-muted); text-align:center;">${t.rank}</span>
+        <span style="font-weight:700; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${t.short_name || t.name}</span>
+        <input type="number" class="edit-pts" data-idx="${i}" value="${t.points}">
+        <input type="number" class="edit-played" data-idx="${i}" value="${t.played}">
+        <input type="number" class="edit-diff" data-idx="${i}" value="${t.diff}">
+      `;
+      editRows.appendChild(row);
+    });
+  });
+
+  document.getElementById("btn-cancel-standings")?.addEventListener("click", () => {
+    if (editPanel) editPanel.style.display = "none";
+  });
+
+  document.getElementById("btn-save-standings")?.addEventListener("click", async () => {
+    if (!standingsData) return;
+    const ptsInputs = document.querySelectorAll(".edit-pts");
+    const playedInputs = document.querySelectorAll(".edit-played");
+    const diffInputs = document.querySelectorAll(".edit-diff");
+
+    const newTeams = JSON.parse(JSON.stringify(standingsData.teams || []));
+    ptsInputs.forEach(input => {
+      const idx = parseInt(input.dataset.idx);
+      if (newTeams[idx]) newTeams[idx].points = parseInt(input.value) || 0;
+    });
+    playedInputs.forEach(input => {
+      const idx = parseInt(input.dataset.idx);
+      if (newTeams[idx]) newTeams[idx].played = parseInt(input.value) || 0;
+    });
+    diffInputs.forEach(input => {
+      const idx = parseInt(input.dataset.idx);
+      if (newTeams[idx]) newTeams[idx].diff = parseInt(input.value) || 0;
+    });
+
+    // Re-trier par points décroissants puis diff décroissante
+    newTeams.sort((a, b) => b.points - a.points || b.diff - a.diff);
+    newTeams.forEach((t, idx) => { t.rank = idx + 1; });
+
+    try {
+      const res = await fetch("/api/standings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teams: newTeams })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        standingsData = data.standings;
+        renderStandings();
+        if (editPanel) editPanel.style.display = "none";
+        alert("Classement mis à jour avec succès !");
+      }
+    } catch (err) {
+      alert("Erreur lors de la sauvegarde du classement.");
+    }
+  });
+}
+
 // Global exposure
 window.switchTab = switchTab;
 window.sendStatAction = sendStatAction;
@@ -1025,3 +1209,5 @@ window.addPointsToTeam = addPointsToTeam;
 window.openCardPicker = openCardPicker;
 window.submitCardAction = submitCardAction;
 window.deletePlayer = deletePlayer;
+window.fetchStandings = fetchStandings;
+window.renderStandings = renderStandings;
