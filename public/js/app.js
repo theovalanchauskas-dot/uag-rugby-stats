@@ -50,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initTabs();
   initHalfButtons();
   initPhaseFilterButtons();
+  fetchState();
   initSSE();
   initUIEvents();
   initStandingsEvents();
