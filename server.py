@@ -319,81 +319,99 @@ class UAGRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def handle_action(self, payload):
         """
-        Incrémente ou décrémente une statistique en direct.
+        Incrémente ou décrémente une statistique en direct (supporte 1 ou plusieurs joueuses).
         Payload attendu:
         {
-            "playerId": "p1",
+            "playerId": "p1",  # ou "playerIds": ["p1", "p2"]
             "half": "first" | "second",
             "category": "tackles_made",
             "delta": 1 | -1,
-            "user": "Nom de la blessée (optionnel)"
+            "user": "Staff UAG"
         }
         """
-        player_id = payload.get("playerId")
+        player_ids = payload.get("playerIds")
+        if not player_ids:
+            single_id = payload.get("playerId")
+            if single_id:
+                player_ids = [single_id]
+            else:
+                player_ids = []
+
         half = payload.get("half", match_state.get("match", {}).get("currentHalf", "first"))
         category = payload.get("category")
         delta = int(payload.get("delta", 1))
-        user_name = payload.get("user", "Joueuse blessée")
+        user_name = payload.get("user", "Staff UAG")
 
-        if not player_id or not category:
-            self.send_error(400, "playerId et category requis")
+        if not player_ids or not category:
+            self.send_error(400, "playerId(s) et category requis")
             return
 
         with lock:
-            target_player = None
-            for p in match_state.get("players", []):
-                if p["id"] == player_id:
-                    target_player = p
-                    break
+            actions_created = []
+            for p_id in player_ids:
+                target_player = None
+                for p in match_state.get("players", []):
+                    if p["id"] == p_id:
+                        target_player = p
+                        break
+                if not target_player:
+                    continue
 
-            if not target_player:
-                self.send_error(404, "Joueuse non trouvée")
+                if half not in target_player["stats"]:
+                    target_player["stats"][half] = {}
+
+                current_val = target_player["stats"][half].get(category, 0)
+                new_val = max(0, current_val + delta)
+                target_player["stats"][half][category] = new_val
+
+                # Si l'action est un essai marqué, on peut aussi incrémenter le score du match si c'est un +1
+                if category == "tries":
+                    if delta > 0:
+                        match_state["match"]["scoreUAG"] = match_state["match"].get("scoreUAG", 0) + 5
+                    elif delta < 0 and match_state["match"].get("scoreUAG", 0) >= 5:
+                        match_state["match"]["scoreUAG"] = max(0, match_state["match"].get("scoreUAG", 0) - 5)
+
+                cat_info = CATEGORIES_METADATA.get(category, {"label": category})
+                action_record = {
+                    "id": f"act-{int(time.time() * 1000)}-{p_id}",
+                    "time": datetime.now().strftime("%H:%M:%S"),
+                    "minute": match_state.get("match", {}).get("timer", {}).get("minutes", 0),
+                    "half": half,
+                    "playerId": p_id,
+                    "playerName": target_player["name"],
+                    "category": category,
+                    "label": cat_info.get("label", category),
+                    "delta": delta,
+                    "newValue": new_val,
+                    "user": user_name
+                }
+                actions_created.append(action_record)
+
+                if "history" not in match_state:
+                    match_state["history"] = []
+                match_state["history"].insert(0, action_record)
+
+            if not actions_created:
+                self.send_error(404, "Aucune joueuse valide trouvée")
                 return
 
-            if half not in target_player["stats"]:
-                target_player["stats"][half] = {}
-
-            current_val = target_player["stats"][half].get(category, 0)
-            new_val = max(0, current_val + delta)
-            target_player["stats"][half][category] = new_val
-
-            # Si l'action est un essai marqué, on peut aussi incrémenter le score du match si c'est un +1
-            if category == "tries":
-                if delta > 0:
-                    match_state["match"]["scoreUAG"] = match_state["match"].get("scoreUAG", 0) + 5
-                elif delta < 0 and match_state["match"].get("scoreUAG", 0) >= 5:
-                    match_state["match"]["scoreUAG"] = max(0, match_state["match"].get("scoreUAG", 0) - 5)
-
-            cat_info = CATEGORIES_METADATA.get(category, {"label": category})
-            action_record = {
-                "id": f"act-{int(time.time() * 1000)}",
-                "time": datetime.now().strftime("%H:%M:%S"),
-                "minute": match_state.get("match", {}).get("timer", {}).get("minutes", 0),
-                "half": half,
-                "playerId": player_id,
-                "playerName": target_player["name"],
-                "category": category,
-                "label": cat_info.get("label", category),
-                "delta": delta,
-                "newValue": new_val,
-                "user": user_name
-            }
-
-            if "history" not in match_state:
-                match_state["history"] = []
-            match_state["history"].insert(0, action_record)
             # Limite l'historique aux 200 dernières actions
             match_state["history"] = match_state["history"][:200]
-
             save_state(match_state)
+
+        last_action = actions_created[0]
+        combined_action = dict(last_action)
+        if len(actions_created) > 1:
+            combined_action["playerName"] = ", ".join([a["playerName"] for a in actions_created])
 
         # Diffusion temps réel à tous les écrans
         broadcast_update("action", {
             "state": match_state,
-            "lastAction": action_record
+            "lastAction": combined_action,
+            "actions": actions_created
         })
 
-        self.send_json({"success": True, "action": action_record, "state": match_state})
+        self.send_json({"success": True, "action": combined_action, "actions": actions_created, "state": match_state})
 
     def handle_undo(self):
         """Annule la toute dernière action enregistrée."""

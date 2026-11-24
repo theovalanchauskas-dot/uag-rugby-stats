@@ -91,39 +91,43 @@
         </button>
       </div>
 
-      <!-- PAVÉ DE SÉLECTION RAPIDE DE JOUEUSE PAR NUMÉRO -->
-      <div class="quick-number-pad" id="quick-number-pad">
-        <!-- Rempli dynamiquement avec les numéros : #1 Léa, #2 Nono... -->
-      </div>
+      <!-- SÉLECTEUR DE JOUEUSES EN MENU DÉROULANT (ÉPURÉ & MULTI-SÉLECTION) -->
+      <div class="player-dropdown-container" id="player-dropdown-container">
+        <button class="player-dropdown-trigger" id="btn-player-dropdown-trigger" type="button" aria-expanded="false" title="Cliquer pour changer de joueuse ou sélectionner plusieurs joueuses">
+          <div class="dropdown-trigger-main" id="dropdown-selected-display">
+            <!-- Rempli dynamiquement : Maillot #1 + Léa (Pilier Gauche) OU "2 joueuses sélectionnées" -->
+          </div>
+          <div class="dropdown-trigger-badge">
+            <span class="dropdown-arrow-icon" id="dropdown-arrow-icon">▾</span>
+          </div>
+        </button>
 
-      <!-- BANDEAU CARROUSEL DE JOUEUSES (1 SEUL CHOIX, SIMPLE & ÉLÉGANT) -->
-      <div class="players-scroll-bar" id="player-carousel-track">
-        <!-- Rempli dynamiquement : [#2 Nono] [#1 Léa] [#8 Camille]... -->
-      </div>
+        <!-- MENU DÉROULANT FLOTTANT DE SÉLECTION -->
+        <div class="player-dropdown-menu" id="player-dropdown-menu" style="display:none;">
+          <div class="dropdown-menu-header">
+            <div class="dropdown-menu-title-row">
+              <span class="dropdown-menu-title">Sélectionner les joueuses</span>
+              <button type="button" class="btn-dropdown-close-x" id="btn-dropdown-close-x">✕</button>
+            </div>
+            <div class="dropdown-filter-chips">
+              <button type="button" class="drop-filter-btn" id="btn-filter-forwards">Avants (1-8)</button>
+              <button type="button" class="drop-filter-btn" id="btn-filter-backs">3/4 (9-15)</button>
+              <button type="button" class="drop-filter-btn" id="btn-filter-all">Toutes</button>
+              <button type="button" class="drop-filter-btn drop-filter-clear" id="btn-filter-clear">Vider</button>
+            </div>
+          </div>
 
-      <!-- SYNTHÈSE ÉPURÉE DE LA JOUEUSE ACTIVE -->
-      <div class="player-summary-strip">
-        <div class="player-name-badge">
-          <span class="player-badge-num" id="current-player-avatar">2</span>
-          <span class="player-badge-name" id="current-player-name">Nono</span>
-          <span class="player-badge-pos" id="tracker-position-badge">Talonneuse</span>
+          <div class="dropdown-players-list" id="dropdown-players-list">
+            <!-- Liste générée dynamiquement avec Maillots UAG rayés, noms, postes et checkboxes -->
+          </div>
+
+          <div class="dropdown-menu-footer">
+            <span class="dropdown-selected-summary" id="dropdown-footer-summary">1 joueuse sélectionnée</span>
+            <button type="button" class="btn-dropdown-validate" id="btn-dropdown-validate">
+              OK
+            </button>
+          </div>
         </div>
-        <div class="player-inline-stats" id="player-inline-kpis">
-          <span id="kpi-tackles-rate">Plaquages: 0%</span>
-          <span class="stat-dot">•</span>
-          <span id="kpi-throws-rate">Touches: -</span>
-          <span class="stat-dot">•</span>
-          <span id="kpi-attack-ratio">Bilan: 0</span>
-        </div>
-      </div>
-
-      <!-- FILTRE PAR PHASE RAPIDE (DISCRET & FACULTATIF) -->
-      <div class="quick-phase-tabs">
-        <button class="phase-pill active" data-phase="all">Tout</button>
-        <button class="phase-pill" data-phase="defense">Défense</button>
-        <button class="phase-pill" data-phase="attaque">Attaque</button>
-        <button class="phase-pill" data-phase="conquete">Touches</button>
-        <button class="phase-pill" data-phase="discipline">Fautes</button>
       </div>
 
       <!-- GRILLE DES ACTIONS PRINCIPALES (SOBRE & HAUTE LISIBILITÉ) -->

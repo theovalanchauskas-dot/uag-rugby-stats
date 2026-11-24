@@ -32,6 +32,7 @@ let matchState = {
 };
 
 let activePlayerId = "p1";
+let selectedPlayerIds = ["p1"];
 let activeHalf = "first"; // "first", "second", "total"
 let activePhaseFilter = "all";
 let activePosFilter = "all";
@@ -220,7 +221,13 @@ function initPhaseFilterButtons() {
    ========================================================================== */
 async function sendStatAction(category, delta) {
   if (activeHalf === "total") {
-    alert("Mode consultation active. Choisissez 1ère ou 2ème mi-temps pour saisir.");
+    alert("Mode consultation actif. Choisissez 1ère ou 2ème mi-temps pour saisir.");
+    return;
+  }
+
+  if (selectedPlayerIds.length === 0) {
+    alert("Veuillez sélectionner au moins une joueuse dans le menu déroulant.");
+    openPlayerDropdown();
     return;
   }
 
@@ -233,7 +240,7 @@ async function sendStatAction(category, delta) {
   }
 
   const payload = {
-    playerId: activePlayerId,
+    playerIds: selectedPlayerIds,
     half: activeHalf,
     category: category,
     delta: delta,
@@ -320,6 +327,7 @@ function triggerCountPop(category) {
 function renderAll() {
   updateToucheModeUI();
   renderScoreboard();
+  renderPlayerDropdown();
   renderPlayerChips();
   renderQuickNumberPad();
   renderPlayerSummary();
@@ -332,210 +340,243 @@ function renderAll() {
 }
 
 function updateToucheModeUI() {
-  const carousel = document.getElementById("player-carousel-track");
-  const phaseTabs = document.querySelector(".quick-phase-tabs");
-  const quickPad = document.getElementById("quick-number-pad");
   const btnTouche = document.getElementById("btn-toggle-touche-mode");
   const labelTouche = document.getElementById("label-touche-mode");
 
   if (btnTouche) btnTouche.classList.toggle("active", isToucheMode);
   if (labelTouche) labelTouche.textContent = isToucheMode ? "Mode Touche" : "Mode Complet";
-  if (carousel) carousel.style.display = isToucheMode ? "none" : "flex";
-  if (phaseTabs) phaseTabs.style.display = isToucheMode ? "none" : "flex";
-  if (quickPad) quickPad.style.display = isToucheMode ? "flex" : "none";
 }
 
-function renderScoreboard() {
-  const m = matchState.match || {};
-  const uagEl = document.getElementById("score-uag");
-  const oppEl = document.getElementById("score-opponent");
-  const oppLbl = document.getElementById("label-opponent");
-  if (uagEl) uagEl.textContent = m.scoreUAG !== undefined ? m.scoreUAG : 0;
-  if (oppEl) oppEl.textContent = m.scoreOpponent !== undefined ? m.scoreOpponent : 0;
-  if (oppLbl) oppLbl.textContent = (m.opponent || "ADV").substring(0, 5).toUpperCase();
-
-  const timerDisplay = document.getElementById("match-timer-display");
-  const btnToggle = document.getElementById("btn-timer-toggle");
-  if (m.timer && timerDisplay) {
-    const min = String(m.timer.minutes || 0).padStart(2, "0");
-    const sec = String(m.timer.seconds || 0).padStart(2, "0");
-    timerDisplay.textContent = `${min}:${sec}`;
-    if (btnToggle) btnToggle.textContent = m.timer.isRunning ? "⏸" : "▶";
-  }
-
-  // Modale score
-  const modalUag = document.getElementById("score-modal-uag-val");
-  const modalOpp = document.getElementById("score-modal-opp-val");
-  const modalOppLbl = document.getElementById("score-modal-opp-label");
-  if (modalUag) modalUag.textContent = m.scoreUAG || 0;
-  if (modalOpp) modalOpp.textContent = m.scoreOpponent || 0;
-  if (modalOppLbl) modalOppLbl.textContent = (m.opponent || "ADVERSAIRE").toUpperCase();
-}
-
-function renderPlayerChips() {
-  const track = document.getElementById("player-carousel-track");
-  if (!track) return;
+function renderPlayerDropdown() {
+  const container = document.getElementById("player-dropdown-container");
+  if (!container) return;
 
   const players = matchState.players || [];
-  track.innerHTML = "";
-
   if (players.length === 0) return;
 
-  if (!players.some(p => p.id === activePlayerId)) {
-    activePlayerId = players[0].id;
+  // Filtrer les IDs sélectionnés qui n'existent plus
+  selectedPlayerIds = selectedPlayerIds.filter(id => players.some(p => p.id === id));
+  if (selectedPlayerIds.length === 0 && players.length > 0) {
+    selectedPlayerIds = [players[0].id];
+  }
+  activePlayerId = selectedPlayerIds[0] || (players[0] ? players[0].id : "");
+
+  renderDropdownSelectedDisplay();
+  renderDropdownPlayersList();
+}
+
+function renderDropdownSelectedDisplay() {
+  const display = document.getElementById("dropdown-selected-display");
+  if (!display) return;
+
+  const players = matchState.players || [];
+  const selected = players.filter(p => selectedPlayerIds.includes(p.id));
+
+  if (selected.length === 1) {
+    const p = selected[0];
+    const stats = getPlayerStats(p, activeHalf);
+    const tMade = stats.tackles_made || 0;
+    const tMiss = stats.tackles_missed || 0;
+    const tTot = tMade + tMiss;
+    const tRate = tTot > 0 ? Math.round((tMade / tTot) * 100) : 0;
+    const tries = stats.tries || 0;
+    const turnWon = stats.turnovers_won || 0;
+
+    display.innerHTML = `
+      <div class="dropdown-trigger-jersey">
+        <div class="rugby-jersey-mini jersey-active">
+          <span class="jersey-mini-num">${p.number || "-"}</span>
+        </div>
+      </div>
+      <div class="dropdown-trigger-info">
+        <div class="dropdown-trigger-name">${p.name} <span class="dropdown-trigger-pos">(${p.position || "Joueuse"})</span></div>
+        <div class="dropdown-trigger-stats">
+          ${tTot > 0 ? `🛡️ ${tRate}% plaquages (${tMade}/${tTot})` : `0 plaquage`} • 🏉 ${tries} essai${tries > 1 ? "s" : ""} • 🧲 ${turnWon} grattage${turnWon > 1 ? "s" : ""}
+        </div>
+      </div>
+    `;
+  } else if (selected.length > 1) {
+    const numbers = selected.map(p => `#${p.number || "-"}`).join(", ");
+    const names = selected.map(p => p.name).join(", ");
+    display.innerHTML = `
+      <div class="dropdown-trigger-jersey group-jersey">
+        <span>👥</span>
+      </div>
+      <div class="dropdown-trigger-info">
+        <div class="dropdown-trigger-name">
+          <strong>${selected.length} joueuses sélectionnées</strong>
+          <span class="dropdown-trigger-pos">(${numbers})</span>
+        </div>
+        <div class="dropdown-trigger-stats">${names}</div>
+      </div>
+    `;
+  } else {
+    display.innerHTML = `
+      <div class="dropdown-trigger-jersey">
+        <span style="font-size:1.3rem;">⚠️</span>
+      </div>
+      <div class="dropdown-trigger-info">
+        <div class="dropdown-trigger-name" style="color:var(--uag-gold);">Aucune joueuse sélectionnée</div>
+        <div class="dropdown-trigger-stats">Cliquez pour choisir une ou plusieurs joueuses</div>
+      </div>
+    `;
   }
 
-  players.forEach(p => {
-    const chip = document.createElement("div");
-    const isActive = p.id === activePlayerId;
-    chip.className = `player-chip ${isActive ? "active" : ""}`;
-    chip.dataset.id = p.id;
-    chip.onclick = () => {
-      activePlayerId = p.id;
-      if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
-      renderAll();
-    };
+  const footerSummary = document.getElementById("dropdown-footer-summary");
+  if (footerSummary) {
+    footerSummary.textContent = `${selected.length} joueuse${selected.length > 1 ? "s" : ""} sélectionnée${selected.length > 1 ? "s" : ""}`;
+  }
+}
 
-    chip.innerHTML = `
-      <div class="rugby-jersey-mini ${isActive ? 'jersey-active' : ''}">
+function renderDropdownPlayersList() {
+  const list = document.getElementById("dropdown-players-list");
+  if (!list) return;
+
+  const players = matchState.players || [];
+  list.innerHTML = "";
+
+  players.forEach(p => {
+    const isSelected = selectedPlayerIds.includes(p.id);
+    const stats = getPlayerStats(p, activeHalf);
+    const tMade = stats.tackles_made || 0;
+
+    const row = document.createElement("div");
+    row.className = `dropdown-player-row ${isSelected ? "selected" : ""}`;
+    row.onclick = () => togglePlayerSelection(p.id);
+
+    row.innerHTML = `
+      <input type="checkbox" class="dropdown-player-checkbox" ${isSelected ? "checked" : ""} onclick="event.stopPropagation(); togglePlayerSelection('${p.id}');">
+      <div class="rugby-jersey-mini ${isSelected ? "jersey-active" : ""}">
         <span class="jersey-mini-num">${p.number || "-"}</span>
       </div>
-      <span class="chip-name">${p.name}</span>
+      <div class="dropdown-player-meta">
+        <span class="dropdown-player-name">${p.name}</span>
+        <span class="dropdown-player-pos">${p.position || "Joueuse"}</span>
+      </div>
+      <div class="dropdown-player-quickstat">
+        ${tMade} plq
+      </div>
+      <button type="button" class="btn-select-only" onclick="event.stopPropagation(); selectOnlyPlayer('${p.id}')">
+        Seule
+      </button>
     `;
 
-    track.appendChild(chip);
+    list.appendChild(row);
   });
 }
 
-function renderQuickNumberPad() {
-  const pad = document.getElementById("quick-number-pad");
-  if (!pad) return;
+function togglePlayerSelection(id) {
+  if (selectedPlayerIds.includes(id)) {
+    selectedPlayerIds = selectedPlayerIds.filter(x => x !== id);
+  } else {
+    selectedPlayerIds.push(id);
+  }
+  activePlayerId = selectedPlayerIds[0] || "";
+  renderPlayerDropdown();
+  renderActionsGrid();
+  if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) {} }
+}
+
+function selectOnlyPlayer(id) {
+  selectedPlayerIds = [id];
+  activePlayerId = id;
+  closePlayerDropdown();
+  renderAll();
+  if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
+}
+
+function selectPlayerPreset(preset) {
   const players = matchState.players || [];
-  pad.innerHTML = "";
-  if (players.length === 0) return;
-
-  players.forEach(p => {
-    const btn = document.createElement("button");
-    const isActive = p.id === activePlayerId;
-    btn.className = `num-pad-btn ${isActive ? "active" : ""}`;
-    btn.dataset.id = p.id;
-    btn.innerHTML = `
-      <span class="num-pad-jersey-tag"><span class="num-pad-badge">#${p.number || "-"}</span></span>
-      <span class="num-pad-name">${p.name}</span>
-    `;
-    btn.onclick = () => {
-      activePlayerId = p.id;
-      if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
-      renderAll();
-      const chip = document.querySelector(`.player-chip[data-id="${p.id}"]`);
-      if (chip) chip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-    };
-    pad.appendChild(btn);
-  });
+  if (preset === "all") {
+    selectedPlayerIds = players.map(p => p.id);
+  } else if (preset === "forwards") {
+    selectedPlayerIds = players.filter(p => (p.number || 0) >= 1 && (p.number || 0) <= 8).map(p => p.id);
+    if (selectedPlayerIds.length === 0) {
+      selectedPlayerIds = players.slice(0, 8).map(p => p.id);
+    }
+  } else if (preset === "backs") {
+    selectedPlayerIds = players.filter(p => (p.number || 0) >= 9).map(p => p.id);
+    if (selectedPlayerIds.length === 0) {
+      selectedPlayerIds = players.slice(8).map(p => p.id);
+    }
+  } else if (preset === "clear") {
+    selectedPlayerIds = [];
+  }
+  activePlayerId = selectedPlayerIds[0] || "";
+  renderPlayerDropdown();
+  renderActionsGrid();
+  if (navigator.vibrate) { try { navigator.vibrate(25); } catch (e) {} }
 }
 
-// CÉLÉBRATION ESSAI DYNAMIQUE
-function triggerEssaiCelebration() {
-  const banner = document.getElementById("essai-celebration");
-  if (!banner) return;
-  banner.style.display = "flex";
-  banner.classList.remove("celebration-anim");
-  void banner.offsetWidth;
-  banner.classList.add("celebration-anim");
-  if (navigator.vibrate) {
-    try { navigator.vibrate([100, 50, 150, 50, 250]); } catch (e) {}
-  }
-  setTimeout(() => {
-    banner.style.display = "none";
-  }, 2800);
+function clearPlayerSelection() {
+  selectPlayerPreset("clear");
 }
 
-// MODE PLEIN SOLEIL / HAUT CONTRASTE EXTÉRIEUR
-function initSunlightMode() {
-  const btn = document.getElementById("btn-sunlight-toggle");
-  const icon = document.getElementById("sunlight-icon");
-  const isSunlight = localStorage.getItem("uag_sunlight_mode") === "true";
+function togglePlayerDropdown() {
+  const menu = document.getElementById("player-dropdown-menu");
+  const trigger = document.getElementById("btn-player-dropdown-trigger");
+  if (!menu || !trigger) return;
 
-  if (isSunlight) {
-    document.body.classList.add("sunlight-mode");
-    if (icon) icon.textContent = "🌙";
-  }
-
-  if (btn) {
-    btn.onclick = () => {
-      const active = document.body.classList.toggle("sunlight-mode");
-      localStorage.setItem("uag_sunlight_mode", active ? "true" : "false");
-      if (icon) icon.textContent = active ? "🌙" : "☀️";
-      if (navigator.vibrate) { try { navigator.vibrate(25); } catch (e) {} }
-    };
+  const isOpen = menu.style.display !== "none";
+  if (isOpen) {
+    closePlayerDropdown();
+  } else {
+    openPlayerDropdown();
   }
 }
 
-function getPlayerStats(player, half) {
-  if (!player || !player.stats) return {};
-  if (half === "total") {
-    const first = player.stats.first || {};
-    const second = player.stats.second || {};
-    const total = {};
-    ACTIONS.forEach(a => {
-      total[a.key] = (first[a.key] || 0) + (second[a.key] || 0);
-    });
-    total.yellow_cards = (first.yellow_cards || 0) + (second.yellow_cards || 0);
-    total.white_cards = (first.white_cards || 0) + (second.white_cards || 0);
-    total.red_cards = (first.red_cards || 0) + (second.red_cards || 0);
-    return total;
-  }
-  return player.stats[half] || {};
+function openPlayerDropdown() {
+  const menu = document.getElementById("player-dropdown-menu");
+  const trigger = document.getElementById("btn-player-dropdown-trigger");
+  if (!menu || !trigger) return;
+
+  menu.style.display = "flex";
+  trigger.classList.add("open");
+  trigger.setAttribute("aria-expanded", "true");
+  renderDropdownPlayersList();
 }
 
-function renderPlayerSummary() {
-  const player = (matchState.players || []).find(p => p.id === activePlayerId);
-  if (!player) return;
+function closePlayerDropdown() {
+  const menu = document.getElementById("player-dropdown-menu");
+  const trigger = document.getElementById("btn-player-dropdown-trigger");
+  if (!menu || !trigger) return;
 
-  const avatar = document.getElementById("current-player-avatar");
-  const nameEl = document.getElementById("current-player-name");
-  const posEl = document.getElementById("tracker-position-badge");
-
-  if (avatar) avatar.textContent = player.number || player.name.charAt(0);
-  if (nameEl) nameEl.textContent = player.name;
-  if (posEl) posEl.textContent = player.position || "Joueuse";
-
-  const stats = getPlayerStats(player, activeHalf);
-
-  const tMade = stats.tackles_made || 0;
-  const tMiss = stats.tackles_missed || 0;
-  const tTot = tMade + tMiss;
-  const tRate = tTot > 0 ? Math.round((tMade / tTot) * 100) : 0;
-  const tackEl = document.getElementById("kpi-tackles-rate");
-  if (tackEl) {
-    tackEl.innerHTML = `Plaquages: <strong>${tTot > 0 ? tRate + "%" : "-"}</strong> (${tMade}/${tTot})`;
-  }
-
-  const lMade = stats.lineout_throws_made || 0;
-  const lMiss = stats.lineout_throws_lost || 0;
-  const lTot = lMade + lMiss;
-  const lRate = lTot > 0 ? Math.round((lMade / lTot) * 100) : 0;
-  const throwEl = document.getElementById("kpi-throws-rate");
-  if (throwEl) {
-    throwEl.innerHTML = lTot > 0 ? `Touches: <strong>${lRate}%</strong> (${lMade}/${lTot})` : `Touches: -`;
-  }
-
-  const off = stats.offensive_actions || 0;
-  const lost = stats.turnovers_lost || 0;
-  const ratio = off - lost;
-  const ratioEl = document.getElementById("kpi-attack-ratio");
-  if (ratioEl) {
-    const sign = ratio > 0 ? `+${ratio}` : `${ratio}`;
-    ratioEl.innerHTML = `Bilan: <strong>${sign}</strong>`;
-  }
+  menu.style.display = "none";
+  trigger.classList.remove("open");
+  trigger.setAttribute("aria-expanded", "false");
 }
+
+function renderPlayerChips() {}
+function renderQuickNumberPad() {}
+function renderPlayerSummary() {}
 
 function renderActionsGrid() {
   const grid = document.getElementById("stats-buttons-grid");
   if (!grid) return;
 
-  const player = (matchState.players || []).find(p => p.id === activePlayerId);
-  const stats = getPlayerStats(player, activeHalf);
+  const players = matchState.players || [];
+  const selectedPlayers = players.filter(p => selectedPlayerIds.includes(p.id));
+
+  let stats = {};
+  if (selectedPlayers.length === 1) {
+    stats = getPlayerStats(selectedPlayers[0], activeHalf);
+  } else if (selectedPlayers.length > 1) {
+    ACTIONS.forEach(a => { stats[a.key] = 0; });
+    stats.yellow_cards = 0;
+    stats.white_cards = 0;
+    stats.red_cards = 0;
+    stats.minutes_played = 0;
+    selectedPlayers.forEach(p => {
+      const s = getPlayerStats(p, activeHalf);
+      ACTIONS.forEach(a => { stats[a.key] += (s[a.key] || 0); });
+      stats.yellow_cards += (s.yellow_cards || 0);
+      stats.white_cards += (s.white_cards || 0);
+      stats.red_cards += (s.red_cards || 0);
+      stats.minutes_played = Math.max(stats.minutes_played, s.minutes_played || 0);
+    });
+  } else {
+    stats = {};
+  }
   const isTotal = activeHalf === "total";
 
   grid.innerHTML = "";
@@ -1031,9 +1072,18 @@ async function addPointsToTeam(team, points) {
 }
 
 function openCardPicker() {
-  const player = (matchState.players || []).find(p => p.id === activePlayerId);
+  const players = matchState.players || [];
+  const selected = players.filter(p => selectedPlayerIds.includes(p.id));
   const title = document.getElementById("card-picker-player-name");
-  if (title && player) title.textContent = `#${player.number} ${player.name} (${player.position})`;
+  if (title) {
+    if (selected.length === 1) {
+      title.textContent = `#${selected[0].number} ${selected[0].name} (${selected[0].position})`;
+    } else if (selected.length > 1) {
+      title.textContent = `${selected.length} joueuses (${selected.map(p => p.name).join(", ")})`;
+    } else {
+      title.textContent = "Aucune joueuse sélectionnée";
+    }
+  }
   document.getElementById("modal-card-picker")?.classList.add("active");
 }
 
@@ -1068,6 +1118,26 @@ function closeShareModal() {
    EVENEMENTS UI
    ========================================================================== */
 function initUIEvents() {
+  // Dropdown Joueuses
+  document.getElementById("btn-player-dropdown-trigger")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    togglePlayerDropdown();
+  });
+  document.getElementById("btn-dropdown-close-x")?.addEventListener("click", closePlayerDropdown);
+  document.getElementById("btn-dropdown-validate")?.addEventListener("click", closePlayerDropdown);
+  document.getElementById("btn-filter-forwards")?.addEventListener("click", () => selectPlayerPreset("forwards"));
+  document.getElementById("btn-filter-backs")?.addEventListener("click", () => selectPlayerPreset("backs"));
+  document.getElementById("btn-filter-all")?.addEventListener("click", () => selectPlayerPreset("all"));
+  document.getElementById("btn-filter-clear")?.addEventListener("click", () => selectPlayerPreset("clear"));
+
+  // Fermer le menu déroulant si clic en dehors
+  document.addEventListener("click", (e) => {
+    const container = document.getElementById("player-dropdown-container");
+    if (container && !container.contains(e.target)) {
+      closePlayerDropdown();
+    }
+  });
+
   // Undo buttons
   document.getElementById("btn-undo-action")?.addEventListener("click", sendUndoAction);
   document.getElementById("btn-toast-undo")?.addEventListener("click", sendUndoAction);
