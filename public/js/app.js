@@ -348,6 +348,33 @@ function updateToucheModeUI() {
   if (labelTouche) labelTouche.textContent = isToucheMode ? "Mode Touche" : "Mode Complet";
 }
 
+function renderScoreboard() {
+  const m = matchState.match || {};
+  const uagEl = document.getElementById("score-uag");
+  const oppEl = document.getElementById("score-opponent");
+  const oppLbl = document.getElementById("label-opponent");
+  if (uagEl) uagEl.textContent = m.scoreUAG !== undefined ? m.scoreUAG : 0;
+  if (oppEl) oppEl.textContent = m.scoreOpponent !== undefined ? m.scoreOpponent : 0;
+  if (oppLbl) oppLbl.textContent = (m.opponent || "ADV").substring(0, 5).toUpperCase();
+
+  const timerDisplay = document.getElementById("match-timer-display");
+  const btnToggle = document.getElementById("btn-timer-toggle");
+  if (m.timer && timerDisplay) {
+    const min = String(m.timer.minutes || 0).padStart(2, "0");
+    const sec = String(m.timer.seconds || 0).padStart(2, "0");
+    timerDisplay.textContent = `${min}:${sec}`;
+    if (btnToggle) btnToggle.textContent = m.timer.isRunning ? "⏸" : "▶";
+  }
+
+  // Modale score
+  const modalUag = document.getElementById("score-modal-uag-val");
+  const modalOpp = document.getElementById("score-modal-opp-val");
+  const modalOppLbl = document.getElementById("score-modal-opp-label");
+  if (modalUag) modalUag.textContent = m.scoreUAG || 0;
+  if (modalOpp) modalOpp.textContent = m.scoreOpponent || 0;
+  if (modalOppLbl) modalOppLbl.textContent = (m.opponent || "ADVERSAIRE").toUpperCase();
+}
+
 function renderPlayerDropdown() {
   const container = document.getElementById("player-dropdown-container");
   if (!container) return;
@@ -550,6 +577,44 @@ function closePlayerDropdown() {
 function renderPlayerChips() {}
 function renderQuickNumberPad() {}
 function renderPlayerSummary() {}
+
+// MODE PLEIN SOLEIL / HAUT CONTRASTE EXTÉRIEUR
+function initSunlightMode() {
+  const btn = document.getElementById("btn-sunlight-toggle");
+  const icon = document.getElementById("sunlight-icon");
+  const isSunlight = localStorage.getItem("uag_sunlight_mode") === "true";
+
+  if (isSunlight) {
+    document.body.classList.add("sunlight-mode");
+    if (icon) icon.textContent = "🌙";
+  }
+
+  if (btn) {
+    btn.onclick = () => {
+      const active = document.body.classList.toggle("sunlight-mode");
+      localStorage.setItem("uag_sunlight_mode", active ? "true" : "false");
+      if (icon) icon.textContent = active ? "🌙" : "☀️";
+      if (navigator.vibrate) { try { navigator.vibrate(25); } catch (e) {} }
+    };
+  }
+}
+
+function getPlayerStats(player, half) {
+  if (!player || !player.stats) return {};
+  if (half === "total") {
+    const first = player.stats.first || {};
+    const second = player.stats.second || {};
+    const total = {};
+    ACTIONS.forEach(a => {
+      total[a.key] = (first[a.key] || 0) + (second[a.key] || 0);
+    });
+    total.yellow_cards = (first.yellow_cards || 0) + (second.yellow_cards || 0);
+    total.white_cards = (first.white_cards || 0) + (second.white_cards || 0);
+    total.red_cards = (first.red_cards || 0) + (second.red_cards || 0);
+    return total;
+  }
+  return player.stats[half] || {};
+}
 
 function renderActionsGrid() {
   const grid = document.getElementById("stats-buttons-grid");
