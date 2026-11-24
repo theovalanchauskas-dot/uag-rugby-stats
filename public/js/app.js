@@ -52,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initSSE();
   initUIEvents();
   initStandingsEvents();
+  initSunlightMode();
   fetchNetworkInfo();
   fetchStandings();
 });
@@ -227,6 +228,10 @@ async function sendStatAction(category, delta) {
     try { navigator.vibrate(delta > 0 ? 25 : [15, 10, 15]); } catch (e) {}
   }
 
+  if (category === "tries" && delta > 0) {
+    triggerEssaiCelebration();
+  }
+
   const payload = {
     playerId: activePlayerId,
     half: activeHalf,
@@ -303,6 +308,7 @@ function flashCard(category) {
    RENDU VISUEL
    ========================================================================== */
 function renderAll() {
+  updateToucheModeUI();
   renderScoreboard();
   renderPlayerChips();
   renderQuickNumberPad();
@@ -313,6 +319,20 @@ function renderAll() {
   renderTeamKPIs();
   renderLiveFeed();
   renderSettingsPlayersList();
+}
+
+function updateToucheModeUI() {
+  const carousel = document.getElementById("player-carousel-track");
+  const phaseTabs = document.querySelector(".quick-phase-tabs");
+  const quickPad = document.getElementById("quick-number-pad");
+  const btnTouche = document.getElementById("btn-toggle-touche-mode");
+  const labelTouche = document.getElementById("label-touche-mode");
+
+  if (btnTouche) btnTouche.classList.toggle("active", isToucheMode);
+  if (labelTouche) labelTouche.textContent = isToucheMode ? "Mode Touche" : "Mode Complet";
+  if (carousel) carousel.style.display = isToucheMode ? "none" : "flex";
+  if (phaseTabs) phaseTabs.style.display = isToucheMode ? "none" : "flex";
+  if (quickPad) quickPad.style.display = isToucheMode ? "flex" : "none";
 }
 
 function renderScoreboard() {
@@ -357,14 +377,19 @@ function renderPlayerChips() {
 
   players.forEach(p => {
     const chip = document.createElement("div");
-    chip.className = `player-chip ${p.id === activePlayerId ? "active" : ""}`;
+    const isActive = p.id === activePlayerId;
+    chip.className = `player-chip ${isActive ? "active" : ""}`;
+    chip.dataset.id = p.id;
     chip.onclick = () => {
       activePlayerId = p.id;
+      if (navigator.vibrate) { try { navigator.vibrate(20); } catch (e) {} }
       renderAll();
     };
 
     chip.innerHTML = `
-      <span class="chip-num">#${p.number || "-"}</span>
+      <div class="rugby-jersey-mini ${isActive ? 'jersey-active' : ''}">
+        <span class="jersey-mini-num">${p.number || "-"}</span>
+      </div>
       <span class="chip-name">${p.name}</span>
     `;
 
@@ -385,7 +410,9 @@ function renderQuickNumberPad() {
     btn.className = `num-pad-btn ${isActive ? "active" : ""}`;
     btn.dataset.id = p.id;
     btn.innerHTML = `
-      <span class="num-pad-badge">#${p.number || "-"}</span>
+      <div class="rugby-jersey-pad ${isActive ? 'jersey-active' : ''}">
+        <span class="jersey-pad-num">${p.number || "-"}</span>
+      </div>
       <span class="num-pad-name">${p.name}</span>
     `;
     btn.onclick = () => {
@@ -397,6 +424,43 @@ function renderQuickNumberPad() {
     };
     pad.appendChild(btn);
   });
+}
+
+// CÉLÉBRATION ESSAI DYNAMIQUE
+function triggerEssaiCelebration() {
+  const banner = document.getElementById("essai-celebration");
+  if (!banner) return;
+  banner.style.display = "flex";
+  banner.classList.remove("celebration-anim");
+  void banner.offsetWidth;
+  banner.classList.add("celebration-anim");
+  if (navigator.vibrate) {
+    try { navigator.vibrate([100, 50, 150, 50, 250]); } catch (e) {}
+  }
+  setTimeout(() => {
+    banner.style.display = "none";
+  }, 2800);
+}
+
+// MODE PLEIN SOLEIL / HAUT CONTRASTE EXTÉRIEUR
+function initSunlightMode() {
+  const btn = document.getElementById("btn-sunlight-toggle");
+  const icon = document.getElementById("sunlight-icon");
+  const isSunlight = localStorage.getItem("uag_sunlight_mode") === "true";
+
+  if (isSunlight) {
+    document.body.classList.add("sunlight-mode");
+    if (icon) icon.textContent = "🌙";
+  }
+
+  if (btn) {
+    btn.onclick = () => {
+      const active = document.body.classList.toggle("sunlight-mode");
+      localStorage.setItem("uag_sunlight_mode", active ? "true" : "false");
+      if (icon) icon.textContent = active ? "🌙" : "☀️";
+      if (navigator.vibrate) { try { navigator.vibrate(25); } catch (e) {} }
+    };
+  }
 }
 
 function getPlayerStats(player, half) {

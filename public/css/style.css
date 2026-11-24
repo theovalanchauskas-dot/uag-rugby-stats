@@ -1,7 +1,8 @@
 /* ==========================================================================
-   UAG RUGBY GAILLAC - DESIGN MINIMALISTE, SOBRE & ÉPURÉ
-   Palette : Graphite (#0C0D11), Surface (#161820), Bordures (#232632)
-   Accent : Rouge Gaillac (#D90429), Or (#E5A93C), Vert (#10B981)
+   UAG RUGBY GAILLAC - DESIGN OFFICIEL PRO RUGBY
+   Palette : Noir Charbon (#0C0D11), Surface (#15171F), Bordures (#242735)
+   Accents : Rouge Gaillac (#D90429), Or Gaillac (#E5A93C), Vert (#10B981)
+   Typographies : Barlow Condensed & Oswald (Sport), Plus Jakarta Sans (UI)
    ========================================================================== */
 
 :root {
@@ -15,13 +16,17 @@
   --text-muted: #828799;
   --uag-red: #D90429;
   --uag-red-hover: #EF233C;
+  --uag-red-dark: #9E1020;
   --uag-gold: #E5A93C;
+  --uag-gold-glow: rgba(229, 169, 60, 0.45);
   --uag-green: #10B981;
   --uag-danger: #EF4444;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --font-display: 'Barlow Condensed', 'Oswald', -apple-system, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 * {
@@ -32,7 +37,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   background-color: var(--bg-main);
   color: var(--text-main);
   min-height: 100vh;
@@ -41,40 +46,144 @@ body {
   line-height: 1.4;
   overflow-x: hidden;
   padding-bottom: calc(64px + var(--safe-bottom));
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .red-text { color: var(--uag-red); }
 
 /* ==========================================================================
-   HEADER MINIMALISTE (1 SEULE BARRE FLUIDE)
+   LISERÉ OFFICIEL CLUB ROUGE & NOIR UAG
    ========================================================================== */
-.app-header {
-  background: rgba(12, 13, 17, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-color);
+.uag-top-ribbon {
+  height: 3px;
+  width: 100%;
+  background: repeating-linear-gradient(45deg, #D90429, #D90429 14px, #0C0D11 14px, #0C0D11 28px, #E5A93C 28px, #E5A93C 32px);
   position: sticky;
   top: 0;
+  z-index: 101;
+}
+
+/* ==========================================================================
+   CÉLÉBRATION DYNAMIQUE ESSAI UAG
+   ========================================================================== */
+.essai-celebration-banner {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  width: 92%;
+  max-width: 440px;
+  background: linear-gradient(135deg, #FFB703 0%, #D90429 60%, #9E1020 100%);
+  border: 2px solid #FFE6A7;
+  border-radius: 16px;
+  padding: 12px 18px;
+  box-shadow: 0 12px 36px rgba(217, 4, 41, 0.65), 0 0 20px rgba(255, 183, 3, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  user-select: none;
+}
+
+.celebration-anim {
+  animation: celebrationBounce 2.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes celebrationBounce {
+  0% { opacity: 0; transform: translate(-50%, -40px) scale(0.85); }
+  15% { opacity: 1; transform: translate(-50%, 0) scale(1.04); }
+  25% { transform: translate(-50%, 0) scale(1); }
+  85% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -30px) scale(0.9); }
+}
+
+.celebration-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.celebration-ball {
+  font-size: 2.2rem;
+  line-height: 1;
+  animation: ballWobble 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes ballWobble {
+  from { transform: rotate(-12deg) scale(0.95); }
+  to { transform: rotate(12deg) scale(1.05); }
+}
+
+.celebration-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.celebration-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  color: #FFFFFF;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  line-height: 1.1;
+}
+
+.celebration-sub {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #FFF275;
+}
+
+.celebration-sparkles {
+  font-size: 1.5rem;
+  animation: sparklePulse 1s infinite alternate;
+}
+
+@keyframes sparklePulse {
+  0% { transform: scale(0.8) rotate(0deg); opacity: 0.7; }
+  100% { transform: scale(1.25) rotate(20deg); opacity: 1; }
+}
+
+/* ==========================================================================
+   HEADER HABILLAGE TV SCOREBUG & ÉPURÉ
+   ========================================================================== */
+.app-header {
+  background: rgba(12, 13, 17, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 3px;
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: 8px 14px;
   gap: 8px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
   user-select: none;
 }
 
 .header-logo {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  transition: transform 0.15s;
+}
+
+.header-left:active .header-logo {
+  transform: scale(0.95);
 }
 
 .header-title-group {
@@ -83,19 +192,23 @@ body {
 }
 
 .header-title {
-  font-size: 0.95rem;
-  font-weight: 900;
-  letter-spacing: 0.5px;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
   color: var(--text-main);
+  line-height: 1;
 }
 
 .live-status-dot {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.7rem;
+  gap: 4px;
+  font-size: 0.68rem;
   color: var(--uag-green);
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .pulse-dot {
@@ -103,76 +216,123 @@ body {
   height: 6px;
   border-radius: 50%;
   background: var(--uag-green);
-  box-shadow: 0 0 6px var(--uag-green);
+  box-shadow: 0 0 8px var(--uag-green);
+  animation: pulseGreen 1.6s infinite;
 }
 
-/* SCORE ET CHRONO INTÉGRÉS */
+@keyframes pulseGreen {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+/* SCOREBUG STYLE TV INTÉGRÉ */
 .header-center {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
+  user-select: none;
 }
 
 .score-pill {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  padding: 4px 10px;
-  border-radius: 20px;
+  background: linear-gradient(180deg, #181B26 0%, #11131B 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3px 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.82rem;
-  font-weight: 800;
+  gap: 5px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 3px 8px rgba(0, 0, 0, 0.4);
 }
 
 .score-team {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
   color: var(--text-muted);
-  font-size: 0.72rem;
 }
 
-.score-val {
-  color: var(--uag-gold);
-  font-size: 0.95rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.score-sep {
-  color: var(--border-light);
+.score-team-uag {
+  background: linear-gradient(135deg, var(--uag-red), #9E1020);
+  color: #fff !important;
+  padding: 1px 5px;
+  border-radius: 4px;
   font-size: 0.75rem;
 }
 
+.score-val {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--uag-gold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(229, 169, 60, 0.4);
+}
+
+.score-sep {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 0.8rem;
+}
+
 .timer-pill {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
+  background: #11131A;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 4px 8px;
-  border-radius: 20px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  font-family: ui-monospace, Menlo, monospace;
-  color: var(--text-main);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #FFFFFF;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .btn-timer-icon {
   background: none;
   border: none;
-  color: var(--text-muted);
-  font-size: 0.75rem;
+  color: var(--uag-gold);
+  font-size: 0.72rem;
   cursor: pointer;
   padding: 0;
   line-height: 1;
+  transition: transform 0.1s;
+}
+
+.btn-timer-icon:active {
+  transform: scale(0.85);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .btn-icon-ghost {
-  background: none;
-  border: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   color: var(--text-muted);
-  font-size: 1.15rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
   cursor: pointer;
-  padding: 4px;
+  transition: all 0.12s;
+}
+
+.btn-icon-ghost:active {
+  transform: scale(0.92);
+  background: var(--uag-red);
+  color: #fff;
 }
 
 /* ==========================================================================
@@ -1556,7 +1716,24 @@ body {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  margin-bottom: 12px;
+  max-width: 580px;
+  margin: 0 auto 10px auto;
+}
+
+.touche-toggle-more {
+  display: block;
+  width: 100%;
+  max-width: 580px;
+  margin: 0 auto 12px auto;
+  background: var(--bg-card);
+  border: 1px dashed var(--border-color);
+  color: var(--text-muted);
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .btn-touche-big {
