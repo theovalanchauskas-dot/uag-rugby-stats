@@ -736,40 +736,73 @@ body {
 }
 
 /* ==========================================================================
-   ANNULATION FLOTTANTE ÉPURÉE
+   ANNULATION FLOTTANTE ÉPURÉE (PILULE COMPACTE HAUT DE GAMME)
    ========================================================================== */
 .floating-undo-wrapper {
   position: fixed;
-  bottom: calc(64px + var(--safe-bottom) + 8px);
+  bottom: calc(72px + var(--safe-bottom));
   left: 50%;
   transform: translateX(-50%);
-  z-index: 90;
+  z-index: 100;
   display: flex;
   justify-content: center;
-  width: 90%;
-  max-width: 380px;
+  width: auto;
+  max-width: 92vw;
+  pointer-events: none;
+  animation: slideUpUndo 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideUpUndo {
+  from { opacity: 0; transform: translate(-50%, 15px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
 }
 
 .btn-undo-sleek {
-  background: rgba(30, 32, 43, 0.95);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  pointer-events: auto;
+  background: rgba(18, 20, 28, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(229, 169, 60, 0.4);
   color: #fff;
   padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.82rem;
+  border-radius: 24px;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 10px rgba(229, 169, 60, 0.15);
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.15s;
+  gap: 7px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
 }
 
-.btn-undo-sleek:hover {
+.btn-undo-sleek:active {
+  transform: scale(0.95);
   background: var(--uag-red);
   border-color: var(--uag-red);
+}
+
+.undo-icon {
+  color: var(--uag-gold);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.undo-text {
+  font-weight: 800;
+  color: #fff;
+}
+
+.undo-dot {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.undo-details {
+  color: var(--text-muted);
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ==========================================================================
@@ -1746,12 +1779,12 @@ body {
   font-size: 0.85rem;
 }
 
-/* PAVÉ DE SÉLECTION RAPIDE DE JOUEUSE */
+/* PAVÉ DE SÉLECTION RAPIDE DE JOUEUSE (STYLE MAILLOT PRO) */
 .quick-number-pad {
   display: flex;
-  gap: 5px;
+  gap: 7px;
   overflow-x: auto;
-  padding: 6px 0 10px 0;
+  padding: 8px 2px 12px 2px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -1762,17 +1795,17 @@ body {
 
 .num-pad-btn {
   flex: 0 0 auto;
-  background: linear-gradient(180deg, #1C1E2A 0%, #13151F 100%);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 4px 10px 4px 6px;
+  background: linear-gradient(180deg, #181A26 0%, #10121A 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 5px 12px 5px 6px;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   cursor: pointer;
-  transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
   color: var(--text-main);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
   user-select: none;
 }
 
@@ -1781,20 +1814,47 @@ body {
 }
 
 .num-pad-btn.active {
-  background: linear-gradient(145deg, #242838 0%, #161822 100%);
+  background: linear-gradient(145deg, #2A171A 0%, #161824 100%);
   border-color: var(--uag-gold);
   color: #fff;
-  box-shadow: 0 0 14px rgba(229, 169, 60, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 16px rgba(229, 169, 60, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.num-pad-jersey-tag {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #D90429 0%, #B90322 50%, #111 50%, #111 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.num-pad-badge {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 0.82rem;
+  color: #fff;
+  line-height: 1;
 }
 
 .num-pad-name {
   font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 0.78rem;
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.2px;
   white-space: nowrap;
 }
 
-/* GRILLE DU MODE TOUCHE (6 GROS BOUTONS ERGONOMIQUES) */
+.num-pad-btn.active .num-pad-name {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(229, 169, 60, 0.5);
+}
+
+/* GRILLE DU MODE TOUCHE (BOUTONS TACTILES ERGONOMIQUES) */
 .touche-grid-6 {
   grid-column: 1 / -1;
   display: grid;
@@ -1824,20 +1884,20 @@ body {
 
 .btn-touche-big {
   border-radius: var(--radius-md);
-  padding: 14px 14px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 108px;
+  min-height: 104px;
   cursor: pointer;
   position: relative;
   transition: transform 0.08s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.08s ease, filter 0.12s ease;
   user-select: none;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1.5px solid transparent;
 }
 
 .btn-touche-big:active {
-  transform: translateY(3px) scale(0.98);
+  transform: translateY(4px) scale(0.98);
   filter: brightness(1.15);
 }
 
@@ -1864,6 +1924,16 @@ body {
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
+@keyframes countPop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.35); filter: brightness(1.3); }
+  100% { transform: scale(1); }
+}
+
+.count-pop {
+  animation: countPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 .btn-touche-bottom {
   display: flex;
   justify-content: space-between;
@@ -1871,14 +1941,28 @@ body {
   margin-top: 8px;
 }
 
+.btn-touche-labels-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
 .btn-touche-label {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   line-height: 1.1;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.btn-touche-sub {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 2px;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .btn-touche-minus {
@@ -1903,7 +1987,11 @@ body {
   transform: scale(0.9);
 }
 
-/* Couleurs & Tactile 3D spécifiques Mode Touche */
+/* ==========================================================================
+   LES 4 FAMILLES DE COULEURS HARMONISÉES RUGBY
+   ========================================================================== */
+
+/* --- 🟢 1. ACTIONS POSITIVES / CONQUÊTE (Émeraude & Sarcelle) --- */
 .touche-plaq-made {
   background: linear-gradient(180deg, #10B981 0%, #059669 100%);
   border-color: #34D399;
@@ -1911,58 +1999,17 @@ body {
   color: #fff;
 }
 .touche-plaq-made:active {
-  box-shadow: 0 2px 0 #047857, 0 3px 8px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.touche-plaq-miss {
-  background: linear-gradient(180deg, #EF4444 0%, #DC2626 100%);
-  border-color: #F87171;
-  box-shadow: 0 5px 0 #B91C1C, 0 8px 18px rgba(239, 68, 68, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  color: #fff;
-}
-.touche-plaq-miss:active {
-  box-shadow: 0 2px 0 #B91C1C, 0 3px 8px rgba(239, 68, 68, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 0 #047857, 0 3px 8px rgba(16, 185, 129, 0.3);
 }
 
 .touche-grattage {
-  background: linear-gradient(180deg, #F59E0B 0%, #D97706 100%);
-  border-color: #FCD34D;
-  box-shadow: 0 5px 0 #B45309, 0 8px 18px rgba(245, 158, 11, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(180deg, #14B8A6 0%, #0D9488 100%);
+  border-color: #2DD4BF;
+  box-shadow: 0 5px 0 #0F766E, 0 8px 18px rgba(20, 184, 166, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   color: #fff;
 }
 .touche-grattage:active {
-  box-shadow: 0 2px 0 #B45309, 0 3px 8px rgba(245, 158, 11, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.touche-lost {
-  background: linear-gradient(180deg, #8B5CF6 0%, #7C3AED 100%);
-  border-color: #C4B5FD;
-  box-shadow: 0 5px 0 #6D28D9, 0 8px 18px rgba(139, 92, 246, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  color: #fff;
-}
-.touche-lost:active {
-  box-shadow: 0 2px 0 #6D28D9, 0 3px 8px rgba(139, 92, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.touche-penality {
-  background: linear-gradient(180deg, #7F1D1D 0%, #450A0A 100%);
-  border-color: #EF4444;
-  box-shadow: 0 5px 0 #280505, 0 8px 18px rgba(127, 29, 29, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-.touche-penality:active {
-  box-shadow: 0 2px 0 #280505, 0 3px 8px rgba(127, 29, 29, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.touche-try {
-  background: linear-gradient(180deg, #D90429 0%, #9E1020 100%);
-  border-color: #FFE6A7;
-  color: #fff;
-  grid-column: span 2;
-  box-shadow: 0 6px 0 #6A0512, 0 10px 24px rgba(217, 4, 41, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-.touche-try:active {
-  box-shadow: 0 2px 0 #6A0512, 0 4px 10px rgba(217, 4, 41, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 1px 0 #0F766E, 0 3px 8px rgba(20, 184, 166, 0.3);
 }
 
 .touche-offense {
@@ -1972,37 +2019,48 @@ body {
   color: #fff;
 }
 .touche-offense:active {
-  box-shadow: 0 2px 0 #075985, 0 3px 8px rgba(2, 132, 199, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-.touche-ruck {
-  background: linear-gradient(180deg, #EA580C 0%, #C2410C 100%);
-  border-color: #FB923C;
-  box-shadow: 0 5px 0 #9A3412, 0 8px 18px rgba(234, 88, 12, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  color: #fff;
-}
-.touche-ruck:active {
-  box-shadow: 0 2px 0 #9A3412, 0 3px 8px rgba(234, 88, 12, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-.touche-card {
-  background: linear-gradient(180deg, #CA8A04 0%, #A16207 100%);
-  border-color: #FDE047;
-  box-shadow: 0 5px 0 #713F12, 0 8px 18px rgba(202, 138, 4, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  color: #fff;
-}
-.touche-card:active {
-  box-shadow: 0 2px 0 #713F12, 0 3px 8px rgba(202, 138, 4, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 0 #075985, 0 3px 8px rgba(2, 132, 199, 0.3);
 }
 
 .touche-lineout-made {
-  background: linear-gradient(180deg, #0D9488 0%, #0F766E 100%);
-  border-color: #2DD4BF;
-  box-shadow: 0 5px 0 #115E59, 0 8px 18px rgba(13, 148, 136, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(180deg, #16A34A 0%, #15803D 100%);
+  border-color: #4ADE80;
+  box-shadow: 0 5px 0 #166534, 0 8px 18px rgba(22, 163, 74, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   color: #fff;
 }
 .touche-lineout-made:active {
-  box-shadow: 0 2px 0 #115E59, 0 3px 8px rgba(13, 148, 136, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 0 #166534, 0 3px 8px rgba(22, 163, 74, 0.3);
+}
+
+/* --- 🔴 2. FAUTES & ERREURS CONCÉDÉES (Carmin & Ardoise) --- */
+.touche-plaq-miss {
+  background: linear-gradient(180deg, #DC2626 0%, #B91C1C 100%);
+  border-color: #F87171;
+  box-shadow: 0 5px 0 #991B1B, 0 8px 18px rgba(220, 38, 38, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+.touche-plaq-miss:active {
+  box-shadow: 0 1px 0 #991B1B, 0 3px 8px rgba(220, 38, 38, 0.3);
+}
+
+.touche-lost {
+  background: linear-gradient(180deg, #991B1B 0%, #7F1D1D 100%);
+  border-color: #EF4444;
+  box-shadow: 0 5px 0 #450A0A, 0 8px 18px rgba(153, 27, 27, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+.touche-lost:active {
+  box-shadow: 0 1px 0 #450A0A, 0 3px 8px rgba(153, 27, 27, 0.3);
+}
+
+.touche-ruck {
+  background: linear-gradient(180deg, #881337 0%, #4C0519 100%);
+  border-color: #FB7185;
+  box-shadow: 0 5px 0 #20020A, 0 8px 18px rgba(136, 19, 55, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.touche-ruck:active {
+  box-shadow: 0 1px 0 #20020A, 0 3px 8px rgba(136, 19, 55, 0.3);
 }
 
 .touche-lineout-lost {
@@ -2012,7 +2070,51 @@ body {
   color: #fff;
 }
 .touche-lineout-lost:active {
-  box-shadow: 0 2px 0 #1E293B, 0 3px 8px rgba(71, 85, 105, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: 0 1px 0 #1E293B, 0 3px 8px rgba(71, 85, 105, 0.3);
+}
+
+/* --- 🟡 3. DISCIPLINE (Or & Ambre) --- */
+.touche-penality {
+  background: linear-gradient(180deg, #D97706 0%, #B45309 100%);
+  border-color: #FBBF24;
+  box-shadow: 0 5px 0 #78350F, 0 8px 18px rgba(217, 119, 6, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+.touche-penality:active {
+  box-shadow: 0 1px 0 #78350F, 0 3px 8px rgba(217, 119, 6, 0.3);
+}
+
+.touche-card {
+  background: linear-gradient(180deg, #EAB308 0%, #CA8A04 100%);
+  border-color: #FDE047;
+  box-shadow: 0 5px 0 #854D0E, 0 8px 18px rgba(234, 179, 8, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+.touche-card:active {
+  box-shadow: 0 1px 0 #854D0E, 0 3px 8px rgba(234, 179, 8, 0.3);
+}
+
+/* --- 🏉 4. ÉTOILE DU MATCH : ESSAI UAG ! (Rouge Gaillac & Or) --- */
+.touche-try {
+  background: linear-gradient(180deg, #D90429 0%, #9E1020 100%);
+  border-color: #FCD34D;
+  color: #fff;
+  grid-column: span 2;
+  box-shadow: 0 6px 0 #6A0512, 0 10px 24px rgba(217, 4, 41, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.touche-try:active {
+  box-shadow: 0 2px 0 #6A0512, 0 4px 10px rgba(217, 4, 41, 0.4);
+}
+
+/* --- ⏱ 5. TEMPS DE JEU (Graphite Nuit) --- */
+.touche-time {
+  background: linear-gradient(180deg, #1F2937 0%, #111827 100%);
+  border-color: #4B5563;
+  box-shadow: 0 5px 0 #030712, 0 8px 18px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+.touche-time:active {
+  box-shadow: 0 1px 0 #030712, 0 3px 8px rgba(0, 0, 0, 0.4);
 }
 
 .touche-time {

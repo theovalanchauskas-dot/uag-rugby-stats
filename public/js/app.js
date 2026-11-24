@@ -251,6 +251,7 @@ async function sendStatAction(category, delta) {
       matchState = data.state;
       renderAll();
       flashCard(category);
+      triggerCountPop(category);
       if (data.action) showToast(data.action);
     }
   } catch (e) {
@@ -301,6 +302,15 @@ function flashCard(category) {
     card.classList.remove("card-flash");
     void card.offsetWidth;
     card.classList.add("card-flash");
+  }
+}
+
+function triggerCountPop(category) {
+  const el = document.getElementById(`touche-count-${category}`);
+  if (el) {
+    el.classList.remove("count-pop");
+    void el.offsetWidth;
+    el.classList.add("count-pop");
   }
 }
 
@@ -410,9 +420,7 @@ function renderQuickNumberPad() {
     btn.className = `num-pad-btn ${isActive ? "active" : ""}`;
     btn.dataset.id = p.id;
     btn.innerHTML = `
-      <div class="rugby-jersey-pad ${isActive ? 'jersey-active' : ''}">
-        <span class="jersey-pad-num">${p.number || "-"}</span>
-      </div>
+      <span class="num-pad-jersey-tag"><span class="num-pad-badge">#${p.number || "-"}</span></span>
       <span class="num-pad-name">${p.name}</span>
     `;
     btn.onclick = () => {
@@ -538,18 +546,18 @@ function renderActionsGrid() {
     toucheContainer.className = "touche-grid-6";
 
     const toucheActions = [
-      { key: "tackles_made", label: "Plaquage Réussi", icon: "🛡️", cls: "touche-plaq-made" },
-      { key: "tackles_missed", label: "Plaquage Manqué", icon: "⚠️", cls: "touche-plaq-miss" },
-      { key: "turnovers_won", label: "Grattage Gagné", icon: "🧲", cls: "touche-grattage" },
-      { key: "offensive_actions", label: "Action Off.", icon: "⚡", cls: "touche-offense" },
-      { key: "turnovers_lost", label: "Balle Perdue", icon: "❌", cls: "touche-lost" },
-      { key: "rucks_lost", label: "Ruck Inefficace", icon: "📉", cls: "touche-ruck" },
-      { key: "lineout_throws_made", label: "Lancer Réussi", icon: "🎯", cls: "touche-lineout-made" },
-      { key: "lineout_throws_lost", label: "Lancer Manqué", icon: "💨", cls: "touche-lineout-lost" },
-      { key: "penalties", label: "Pénalité", icon: "🚩", cls: "touche-penality" },
-      { key: "yellow_cards", label: "Cartons (B/J/R)", icon: "🟨", cls: "touche-card", isCardModal: true },
-      { key: "tries", label: "Essai UAG !", icon: "🏉", cls: "touche-try" },
-      { key: "minutes_played", label: "Temps de Jeu", icon: "⏱", cls: "touche-time", isTime: true }
+      { key: "tackles_made", label: "Plaquage Réussi", icon: "🛡️", cls: "touche-plaq-made", sub: "Adversaire stoppé" },
+      { key: "tackles_missed", label: "Plaquage Manqué", icon: "⚠️", cls: "touche-plaq-miss", sub: "Adversaire manqué" },
+      { key: "turnovers_won", label: "Grattage Gagné", icon: "🧲", cls: "touche-grattage", sub: "Ballon récupéré au sol" },
+      { key: "offensive_actions", label: "Action Off.", icon: "⚡", cls: "touche-offense", sub: "Percée ou passe clé" },
+      { key: "turnovers_lost", label: "Balle Perdue", icon: "❌", cls: "touche-lost", sub: "En-avant ou perte" },
+      { key: "rucks_lost", label: "Ruck Inefficace", icon: "📉", cls: "touche-ruck", sub: "Soutien en retard" },
+      { key: "lineout_throws_made", label: "Lancer Réussi", icon: "🎯", cls: "touche-lineout-made", sub: "Alignement UAG vainqueur" },
+      { key: "lineout_throws_lost", label: "Lancer Manqué", icon: "💨", cls: "touche-lineout-lost", sub: "Ballon perdu / pas droit" },
+      { key: "penalties", label: "Pénalité", icon: "🚩", cls: "touche-penality", sub: "Faute au sifflet" },
+      { key: "yellow_cards", label: "Cartons (B/J/R)", icon: "🟨", cls: "touche-card", isCardModal: true, sub: "Blanc, Jaune ou Rouge" },
+      { key: "tries", label: "Essai UAG !", icon: "🏉", cls: "touche-try", sub: "+5 pts au score du match" },
+      { key: "minutes_played", label: "Temps de Jeu", icon: "⏱", cls: "touche-time", isTime: true, sub: "Ajuster le temps de jeu" }
     ];
 
     toucheActions.forEach(act => {
@@ -561,10 +569,13 @@ function renderActionsGrid() {
         btn.innerHTML = `
           <div class="btn-touche-header">
             <span class="btn-touche-icon">${act.icon}</span>
-            <span class="btn-touche-count">${totalCards}</span>
+            <span class="btn-touche-count" id="touche-count-${act.key}">${totalCards}</span>
           </div>
           <div class="btn-touche-bottom">
-            <span class="btn-touche-label">${act.label}</span>
+            <div class="btn-touche-labels-wrap">
+              <span class="btn-touche-label">${act.label}</span>
+              <span class="btn-touche-sub">${act.sub}</span>
+            </div>
             <span style="font-size:0.75rem; font-weight:800; opacity:0.85;">Choisir ➔</span>
           </div>
         `;
@@ -577,10 +588,13 @@ function renderActionsGrid() {
         btn.innerHTML = `
           <div class="btn-touche-header">
             <span class="btn-touche-icon">${act.icon}</span>
-            <span class="btn-touche-count">${minVal}'</span>
+            <span class="btn-touche-count" id="touche-count-${act.key}">${minVal}'</span>
           </div>
           <div class="btn-touche-bottom">
-            <span class="btn-touche-label">${act.label}</span>
+            <div class="btn-touche-labels-wrap">
+              <span class="btn-touche-label">${act.label}</span>
+              <span class="btn-touche-sub">${act.sub}</span>
+            </div>
             <div style="display:flex; gap:4px;" onclick="event.stopPropagation();">
               <button class="btn-touche-minus" onclick="sendStatAction('minutes_played', -5)">−5</button>
               <button class="btn-touche-minus" onclick="sendStatAction('minutes_played', 5)">+5</button>
@@ -596,10 +610,13 @@ function renderActionsGrid() {
         btn.innerHTML = `
           <div class="btn-touche-header">
             <span class="btn-touche-icon">${act.icon}</span>
-            <span class="btn-touche-count">${count}</span>
+            <span class="btn-touche-count" id="touche-count-${act.key}">${count}</span>
           </div>
           <div class="btn-touche-bottom">
-            <span class="btn-touche-label">${act.label}</span>
+            <div class="btn-touche-labels-wrap">
+              <span class="btn-touche-label">${act.label}</span>
+              <span class="btn-touche-sub">${act.sub}</span>
+            </div>
             ${count > 0 && !isTotal ? `<button class="btn-touche-minus" onclick="event.stopPropagation(); sendStatAction('${act.key}', -1)" title="Retirer 1">−</button>` : ''}
           </div>
         `;
