@@ -533,7 +533,7 @@ function renderActionsGrid() {
   grid.innerHTML = "";
 
   if (isToucheMode) {
-    // 6 GROS BOUTONS ERGONOMIQUES DU MODE TOUCHE
+    // TOUTES LES ACTIONS EN GROS BOUTONS ERGONOMIQUES (MODE TOUCHE COMPLET)
     const toucheContainer = document.createElement("div");
     toucheContainer.className = "touche-grid-6";
 
@@ -541,62 +541,81 @@ function renderActionsGrid() {
       { key: "tackles_made", label: "Plaquage Réussi", icon: "🛡️", cls: "touche-plaq-made" },
       { key: "tackles_missed", label: "Plaquage Manqué", icon: "⚠️", cls: "touche-plaq-miss" },
       { key: "turnovers_won", label: "Grattage Gagné", icon: "🧲", cls: "touche-grattage" },
+      { key: "offensive_actions", label: "Action Off.", icon: "⚡", cls: "touche-offense" },
       { key: "turnovers_lost", label: "Balle Perdue", icon: "❌", cls: "touche-lost" },
+      { key: "rucks_lost", label: "Ruck Inefficace", icon: "📉", cls: "touche-ruck" },
+      { key: "lineout_throws_made", label: "Lancer Réussi", icon: "🎯", cls: "touche-lineout-made" },
+      { key: "lineout_throws_lost", label: "Lancer Manqué", icon: "💨", cls: "touche-lineout-lost" },
       { key: "penalties", label: "Pénalité", icon: "🚩", cls: "touche-penality" },
-      { key: "tries", label: "Essai UAG !", icon: "🏉", cls: "touche-try" }
+      { key: "yellow_cards", label: "Cartons (B/J/R)", icon: "🟨", cls: "touche-card", isCardModal: true },
+      { key: "tries", label: "Essai UAG !", icon: "🏉", cls: "touche-try" },
+      { key: "minutes_played", label: "Temps de Jeu", icon: "⏱", cls: "touche-time", isTime: true }
     ];
 
     toucheActions.forEach(act => {
       const btn = document.createElement("div");
       btn.className = `btn-touche-big ${act.cls}`;
-      const count = stats[act.key] || 0;
 
-      btn.innerHTML = `
-        <div class="btn-touche-header">
-          <span class="btn-touche-icon">${act.icon}</span>
-          <span class="btn-touche-count">${count}</span>
-        </div>
-        <div class="btn-touche-bottom">
-          <span class="btn-touche-label">${act.label}</span>
-          ${count > 0 && !isTotal ? `<button class="btn-touche-minus" onclick="event.stopPropagation(); sendStatAction('${act.key}', -1)" title="Retirer 1">−</button>` : ''}
-        </div>
-      `;
-
-      btn.onclick = () => {
-        if (isTotal) {
-          alert("Mode consultation actif. Sélectionnez 1ère ou 2ème mi-temps pour saisir.");
-          return;
-        }
-        sendStatAction(act.key, 1);
-      };
+      if (act.isCardModal) {
+        const totalCards = (stats.yellow_cards || 0) + (stats.white_cards || 0) + (stats.red_cards || 0);
+        btn.innerHTML = `
+          <div class="btn-touche-header">
+            <span class="btn-touche-icon">${act.icon}</span>
+            <span class="btn-touche-count">${totalCards}</span>
+          </div>
+          <div class="btn-touche-bottom">
+            <span class="btn-touche-label">${act.label}</span>
+            <span style="font-size:0.75rem; font-weight:800; opacity:0.85;">Choisir ➔</span>
+          </div>
+        `;
+        btn.onclick = () => {
+          if (isTotal) { alert("Mode consultation actif. Sélectionnez 1ère ou 2ème mi-temps."); return; }
+          openCardPicker();
+        };
+      } else if (act.isTime) {
+        const minVal = stats.minutes_played !== undefined ? stats.minutes_played : 40;
+        btn.innerHTML = `
+          <div class="btn-touche-header">
+            <span class="btn-touche-icon">${act.icon}</span>
+            <span class="btn-touche-count">${minVal}'</span>
+          </div>
+          <div class="btn-touche-bottom">
+            <span class="btn-touche-label">${act.label}</span>
+            <div style="display:flex; gap:4px;" onclick="event.stopPropagation();">
+              <button class="btn-touche-minus" onclick="sendStatAction('minutes_played', -5)">−5</button>
+              <button class="btn-touche-minus" onclick="sendStatAction('minutes_played', 5)">+5</button>
+            </div>
+          </div>
+        `;
+        btn.onclick = () => {
+          if (isTotal) { alert("Mode consultation actif."); return; }
+          sendStatAction("minutes_played", 5);
+        };
+      } else {
+        const count = stats[act.key] || 0;
+        btn.innerHTML = `
+          <div class="btn-touche-header">
+            <span class="btn-touche-icon">${act.icon}</span>
+            <span class="btn-touche-count">${count}</span>
+          </div>
+          <div class="btn-touche-bottom">
+            <span class="btn-touche-label">${act.label}</span>
+            ${count > 0 && !isTotal ? `<button class="btn-touche-minus" onclick="event.stopPropagation(); sendStatAction('${act.key}', -1)" title="Retirer 1">−</button>` : ''}
+          </div>
+        `;
+        btn.onclick = () => {
+          if (isTotal) {
+            alert("Mode consultation actif. Sélectionnez 1ère ou 2ème mi-temps pour saisir.");
+            return;
+          }
+          sendStatAction(act.key, 1);
+        };
+      }
 
       toucheContainer.appendChild(btn);
     });
 
     grid.appendChild(toucheContainer);
-
-    // Bouton déroulant pour accéder aux autres actions
-    const toggleMoreBtn = document.createElement("button");
-    toggleMoreBtn.className = "touche-toggle-more";
-    toggleMoreBtn.textContent = showMoreActionsInToucheMode 
-      ? "▲ Masquer les autres actions" 
-      : "▼ Autres actions (Touches, Rucks, Cartons...)";
-    toggleMoreBtn.onclick = () => {
-      showMoreActionsInToucheMode = !showMoreActionsInToucheMode;
-      renderActionsGrid();
-    };
-    grid.appendChild(toggleMoreBtn);
-
-    if (showMoreActionsInToucheMode) {
-      const secondaryGrid = document.createElement("div");
-      secondaryGrid.className = "actions-grid";
-      const secondaryKeys = ["rucks_lost", "offensive_actions", "lineout_throws_made", "lineout_throws_lost", "yellow_cards", "minutes_played"];
-      ACTIONS.filter(a => secondaryKeys.includes(a.key)).forEach(action => {
-        renderStandardActionCard(secondaryGrid, action, stats, isTotal);
-      });
-      grid.appendChild(secondaryGrid);
-    }
-
     return;
   }
 
